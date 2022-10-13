@@ -13,7 +13,7 @@ import javax.persistence.Transient;
 @Table(name = "account")
 @Getter
 @Setter
-public class User extends BaseEntity {
+public class Account extends BaseEntity {
 
 	@Column(name = "password", length = 100)
 	@Type(type="text")
