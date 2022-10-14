@@ -8,6 +8,7 @@ import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.UnauthorizedException;
 import com.web.repositories.AccountRepo;
 import lombok.val;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,26 +51,22 @@ public class LoginController extends BaseController {
             validate.validatePhone(phoneNumber);
         }
         validate.checkPassword(password);
-        try {
-            val account  = accountRepo.findByPhoneNumber(phoneNumber);
-            if(account == null)
-                throw new FormValidateException("account", "Không tìm thấy tài khoản!");
-            if(account != null){
-                if(!account.get().getPassword().equals(common.genPassword(password)))
-                    throw new FormValidateException("password", "Mật khẩu sai!");
-            }
-        }catch (Exception e){
-
+        val account  = accountRepo.findByPhoneNumber(phoneNumber);
+        if(account == null)
+            throw new FormValidateException("account", "Không tìm thấy tài khoản!");
+        if(account != null){
+            System.out.println(!BCrypt.checkpw(password, account.get().getPassword()));
+            if(!BCrypt.checkpw(password, account.get().getPassword()))
+                throw new FormValidateException("password", "Mật khẩu sai!");
         }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(phoneNumber, password));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtProvider.generateJwtToken(authentication);
 
-        Cookie cookie = new Cookie("jwt", jwt);
-        cookie.setMaxAge(100);
-        response.addCookie(cookie);
-        System.out.println("cookie" + cookie);
+//        Cookie cookie = new Cookie("jwt ", jwt);
+//        cookie.setMaxAge(100);
+//        response.addCookie(cookie);
         return ResponseEntity
                 .ok().contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + jwt)
