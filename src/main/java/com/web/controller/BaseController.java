@@ -15,6 +15,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ServerErrorException;
@@ -43,10 +44,32 @@ public class BaseController {
         exceptionMessage.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
         if (ex.getBindingResult() != null) {
             for (val error : ex.getBindingResult().getFieldErrors()) {
-
+                putFieldError(errors, error);
             }
         }
-
+        if (ex.getMessageResult() != null) {
+            for (val error : ex.getMessageResult().entrySet()) {
+                val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.getKey());
+                if (!errors.containsKey(key)) {
+                    try {
+                        val keyLanguage = String.format("%s.%s", ex.getStackTrace()[0].getClassName(), key);
+                        errors.put(key, messageSource.getMessage(keyLanguage, null, LocaleContextHolder.getLocale()));
+                    } catch (NoSuchMessageException ns) {
+                        val value = error.getValue();
+                        errors.put(key, value);
+                    }
+                }
+            }
+        }
+        if (ex.getParams() != null) {
+            for (val param : ex.getParams().entrySet()) {
+                val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, param.getKey());
+                val keyLanguage = String.format("%s.%s", ex.getStackTrace()[0].getClassName(), key);
+                if (!errors.containsKey(key)) {
+                    errors.put(key, messageSource.getMessage(keyLanguage, param.getValue(), LocaleContextHolder.getLocale()));
+                }
+            }
+        }
         exceptionMessage.setErrorCodes(ex.getErrorCodes());
 
         exceptionMessage.setErrors(errors);
@@ -111,5 +134,19 @@ public class BaseController {
         message = "Có lỗi xảy ra";
         log.error(String.format("%s%s?%s", host, req.getRequestURI(), req.getQueryString())+" exception: " + exception.getMessage(), exception);
         return "{\"error\": \"" + message + "\"}";
+    }
+
+    private void putFieldError(Map<String, Object> errors, FieldError error) {
+        try {
+            val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.getDefaultMessage());
+            val keyLanguage = String.format("%s.%s", error.getObjectName(), key);
+            errors.put(key, messageSource.getMessage(keyLanguage, null, LocaleContextHolder.getLocale()));
+        } catch (NoSuchMessageException | NullPointerException ex) {
+            val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.getField());
+            val value = error.getDefaultMessage();
+            if (!errors.containsKey(key)) {
+                errors.put(key, value);
+            }
+        }
     }
 }

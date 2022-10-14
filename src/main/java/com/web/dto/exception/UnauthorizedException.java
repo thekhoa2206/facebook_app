@@ -6,4 +6,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @SuppressWarnings("serial")
 @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "UNAUTHORIZED")
 public class UnauthorizedException extends BaseException {
+
+    public UnauthorizedException(String message) {
+        super(message);
+    }
 }
