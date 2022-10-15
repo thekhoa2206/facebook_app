@@ -4,13 +4,15 @@ import com.web.common.CheckCommon;
 import com.web.common.Common;
 import com.web.config.sercurity.jwt.JwtAuthTokenFilter;
 import com.web.config.sercurity.jwt.JwtProvider;
+import com.web.dto.BaseResponse;
+import com.web.dto.account.AccountResponse;
 import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.UnauthorizedException;
 import com.web.model.Account;
 import com.web.repositories.AccountRepo;
 import lombok.val;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,29 +21,30 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 public class LoginController extends BaseController {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final AccountRepo accountRepo;
     private final JwtAuthTokenFilter jwtAuthTokenFilter;
     private final JwtProvider tokenProvider;
-
-    public LoginController(AuthenticationManager authenticationManager, JwtProvider jwtProvider, AccountRepo accountRepo, JwtAuthTokenFilter jwtAuthTokenFilter, JwtProvider tokenProvider) {
+    private final ModelMapper mapper;
+    public LoginController(AuthenticationManager authenticationManager, JwtProvider jwtProvider, AccountRepo accountRepo, JwtAuthTokenFilter jwtAuthTokenFilter, JwtProvider tokenProvider, ModelMapper mapper) {
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.accountRepo = accountRepo;
         this.jwtAuthTokenFilter = jwtAuthTokenFilter;
         this.tokenProvider = tokenProvider;
+        this.mapper = mapper;
     }
 
-
-    @GetMapping
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ResponseEntity<?> authenticateUser(@Valid @RequestParam(required = false) String phoneNumber, @Valid @RequestParam(required = false) String password, final HttpServletResponse response) {
+    @PostMapping("/login")
+    public BaseResponse login(@Valid @RequestParam(required = false) String phoneNumber, @Valid @RequestParam(required = false) String password) {
         if (phoneNumber == null) {
             throw new FormValidateException("phoneNumber", "Số điện thoại không được để trống!");
         } else {
@@ -71,43 +74,53 @@ public class LoginController extends BaseController {
 //        Cookie cookie = new Cookie("jwt ", jwt);
 //        cookie.setMaxAge(100);
 //        response.addCookie(cookie);
-        return ResponseEntity
-                .ok().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + jwt)
-                .build();
+        val response = new BaseResponse();
+        if(accountReq != null && jwt != null){
+            List<Object> data = new ArrayList<>();
+            val accountResponse = mapper.map(accountReq, AccountResponse.class);
+            accountResponse.setToken("Bear " + jwt);
+            data.add(accountResponse);
+            response.setData(data);
+            response.setCode(HttpStatus.OK);
+            response.setMessage("Đăng nhập thành công!");
+        }
+        return response;
     }
-
-
-
-    @GetMapping
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public ResponseEntity<?> logout(HttpServletRequest request) {
+    @PostMapping("/logout")
+    public BaseResponse logout(HttpServletRequest request) {
         String jwt = jwtAuthTokenFilter.getJwt(request); // lấy jwt từ request
         if(jwt == null)
-            throw new UnauthorizedException("Không có thông tin đăng nhập!");
+            throw new UnauthorizedException("logout.infomation","Không có thông tin đăng nhập!");
 
+        val response = new BaseResponse();
         if (jwt != null && tokenProvider.validateJwtToken(jwt)) {
             String phone = tokenProvider.getUserNameFromJwtToken(jwt); // lấy username từ jwt
 
             if(phone == null)
-                throw new UnauthorizedException("Thông tin số điện thoại của tài khoản sai!");
+                throw new UnauthorizedException("logout.phone","Thông tin số điện thoại của tài khoản sai!");
             else
             {
                 val account  = accountRepo.findByPhoneNumber(phone);
                 if(account == null)
-                    throw new UnauthorizedException("Không tìm thấy tài khoản!");
+                    throw new UnauthorizedException("logout.account","Không tìm thấy tài khoản!");
                 if(account != null){
+                    if(account.get().getUuid() == null)
+                        throw new UnauthorizedException("logout.account","Tài khoản không xác định!");
+
                     val accountReq = account.get();
                     accountReq.setUuid(null);
                     accountRepo.save(accountReq);
+                    if(accountReq != null){
+                        response.setCode(HttpStatus.OK);
+                        response.setMessage("Đăng xuất thành công!");
+                    }
                 }
             }
 
+
         }
 
-        return ResponseEntity
-                .ok().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "")
-                .build();
+        return response;
     }
+
 }

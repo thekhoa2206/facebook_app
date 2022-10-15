@@ -1,11 +1,14 @@
 package com.web.dao.jpa;
 
+import com.web.model.Account;
+import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 @Repository(value = "AccountDao")
@@ -15,5 +18,18 @@ public class AccountDao {
     private EntityManager entityManager;
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountDao.class.toString());
 
+
+    //Hàm tìm acoount
+    public Account findAccountByPhone(String phone){
+        String sql = "SELECT * FROM account where phone_number = :phoneNumber";
+        Query query = entityManager.createNativeQuery(sql, Account.class);
+        Account account = null;
+        try{
+             account = (Account) query.setParameter("phoneNumber", phone).getSingleResult();
+        }catch (Exception e){
+            LOGGER.error("accountDao => ", e.getMessage());
+        }
+        return account;
+    }
 
 }

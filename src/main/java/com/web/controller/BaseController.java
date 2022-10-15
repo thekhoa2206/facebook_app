@@ -25,7 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @CommonsLog
@@ -114,9 +116,42 @@ public class BaseController {
 
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public Error handleUnauthorizedException(HttpServletResponse response) {
+    public ValidateMessage handleUnauthorizedException(HttpServletResponse response, UnauthorizedException ex) {
         response.setContentType("application/json");
-        return new Error(messageSource.getMessage("BaseController.UNAUTHORIZED", null, "Thông tin xác thực không chính xác", LocaleContextHolder.getLocale()));
+        val exceptionMessage = new ValidateMessage();
+        Map<String, Object> errors = new HashMap<String, Object>();
+        exceptionMessage.setStatus(HttpStatus.UNAUTHORIZED.value());
+        if (ex.getBindingResult() != null) {
+            for (val error : ex.getBindingResult().getFieldErrors()) {
+                putFieldError(errors, error);
+            }
+        }
+        if (ex.getMessageResult() != null) {
+            for (val error : ex.getMessageResult().entrySet()) {
+                val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.getKey());
+                if (!errors.containsKey(key)) {
+                    try {
+                        val keyLanguage = String.format("%s.%s", ex.getStackTrace()[0].getClassName(), key);
+                        errors.put(key, messageSource.getMessage(keyLanguage, null, LocaleContextHolder.getLocale()));
+                    } catch (NoSuchMessageException ns) {
+                        val value = error.getValue();
+                        errors.put(key, value);
+                    }
+                }
+            }
+        }
+        if (ex.getParams() != null) {
+            for (val param : ex.getParams().entrySet()) {
+                val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, param.getKey());
+                val keyLanguage = String.format("%s.%s", ex.getStackTrace()[0].getClassName(), key);
+                if (!errors.containsKey(key)) {
+                    errors.put(key, messageSource.getMessage(keyLanguage, param.getValue(), LocaleContextHolder.getLocale()));
+                }
+            }
+        }
+        exceptionMessage.setErrorCodes(ex.getErrorCodes());
+        exceptionMessage.setErrors(errors);
+        return exceptionMessage;
         // return "{\"error\": \"[API] Invalid API key or access token
         // (unrecognized login or wrong password)\"}";
     }

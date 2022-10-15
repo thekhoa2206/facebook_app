@@ -31,7 +31,7 @@ public class CheckCommon {
     //Hàm validate password
     public static void checkPassword(String password){
         if(password != null){
-            if (password.length() > 10) {
+            if (password.length() > 10 && password.length() < 6) {
                 throw new FormValidateException("password.format","Mật khẩu không đúng định dạng");
             }
             else {
