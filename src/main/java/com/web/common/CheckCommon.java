@@ -5,7 +5,7 @@ import com.web.dto.exception.FormValidateException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class validate {
+public class CheckCommon {
     //Hàm validate email
     public static String validateEmail(String email){
         boolean checkEmail = regexEmail(email);

@@ -15,4 +15,5 @@ public class AccountDao {
     private EntityManager entityManager;
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountDao.class.toString());
 
+
 }
