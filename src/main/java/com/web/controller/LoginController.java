@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -64,21 +65,18 @@ public class LoginController extends BaseController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(phoneNumber, password));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtProvider.generateJwtToken(authentication);
-        String uuid = Common.decodeJwt(jwt);
-        if(accountReq.getUuid() != null)
-            if(accountReq.getUuid().equals(uuid))
-                throw new FormValidateException("account", "Tài khoản đã được đăng nhập!");
+        if(accountReq.getUuid() != null){
+            throw new FormValidateException("account", "Tài khoản đã được đăng nhập!");
+        }
+        String uuid = UUID.randomUUID().toString();
+        String jwt = jwtProvider.generateJwtToken(authentication, uuid);
         accountReq.setUuid(uuid);
         accountRepo.save(accountReq);
-//        Cookie cookie = new Cookie("jwt ", jwt);
-//        cookie.setMaxAge(100);
-//        response.addCookie(cookie);
         val response = new BaseResponse();
         if(accountReq != null && jwt != null){
             List<Object> data = new ArrayList<>();
             val accountResponse = mapper.map(accountReq, AccountResponse.class);
-            accountResponse.setToken("Bear " + jwt);
+            accountResponse.setToken(jwt);
             data.add(accountResponse);
             response.setData(data);
             response.setCode(HttpStatus.OK);
@@ -87,8 +85,8 @@ public class LoginController extends BaseController {
         return response;
     }
     @PostMapping("/logout")
-    public BaseResponse logout(HttpServletRequest request) {
-        String jwt = jwtAuthTokenFilter.getJwt(request); // lấy jwt từ request
+    public BaseResponse logout(@RequestParam(required = false) String token) {
+        String jwt = token; // lấy jwt từ request
         if(jwt == null)
             throw new UnauthorizedException("logout.infomation","Không có thông tin đăng nhập!");
 
@@ -116,8 +114,6 @@ public class LoginController extends BaseController {
                     }
                 }
             }
-
-
         }
 
         return response;

@@ -6,6 +6,7 @@ import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.NotFoundException;
 import com.web.dto.exception.UnauthorizedException;
 import com.web.dto.exception.ValidateMessage;
+import com.web.model.Account;
 import lombok.extern.apachecommons.CommonsLog;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
@@ -183,5 +184,9 @@ public class BaseController {
                 errors.put(key, value);
             }
         }
+    }
+
+    private void checkJwt(Account account) {
+
     }
 }

@@ -33,4 +33,12 @@ public class BaseEntity {
 
 	@Column(name = "modified_by")
 	private int modifiedBy;
+
+	public void setCreatedOn(){
+		this.createdOn = new Date();
+	}
+
+	public void setModifiedOn(){
+		this.modifiedOn = new Date();
+	}
 }

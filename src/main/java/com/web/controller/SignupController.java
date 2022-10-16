@@ -54,6 +54,7 @@ public class SignupController extends BaseController{
         Account accountReq = new Account();
         accountReq.setPhoneNumber(phoneNumber);
         accountReq.setPassword(Common.genPassword(password));
+        accountReq.setCreatedOn();
         val accountx = accountRepo.save(accountReq);
         val response = new BaseResponse();
         response.setCode(HttpStatus.OK);
@@ -64,18 +65,5 @@ public class SignupController extends BaseController{
         return response;
     }
 
-    private BaseEntity setBaseEntityCreate(int accountId){
-        BaseEntity entity = new BaseEntity();
-        entity.setDeleted(false);
-        entity.setCreatedBy(accountId);
-        entity.setCreatedOn(new Date());
-        return entity;
-    }
 
-    private BaseEntity setBaseEntityUpdate(int accountId, BaseEntity model){
-        model.setDeleted(false);
-        model.setModifiedBy(accountId);
-        model.setCreatedOn(new Date());
-        return model;
-    }
 }
