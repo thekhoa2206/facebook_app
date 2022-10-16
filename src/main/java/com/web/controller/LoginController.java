@@ -1,9 +1,9 @@
 package com.web.controller;
 
 import com.web.common.CheckCommon;
-import com.web.common.Common;
 import com.web.config.sercurity.jwt.JwtAuthTokenFilter;
 import com.web.config.sercurity.jwt.JwtProvider;
+import com.web.dao.jpa.AccountDao;
 import com.web.dto.BaseResponse;
 import com.web.dto.account.AccountResponse;
 import com.web.dto.exception.FormValidateException;
@@ -20,7 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,13 +34,16 @@ public class LoginController extends BaseController {
     private final JwtAuthTokenFilter jwtAuthTokenFilter;
     private final JwtProvider tokenProvider;
     private final ModelMapper mapper;
-    public LoginController(AuthenticationManager authenticationManager, JwtProvider jwtProvider, AccountRepo accountRepo, JwtAuthTokenFilter jwtAuthTokenFilter, JwtProvider tokenProvider, ModelMapper mapper) {
+    private final AccountDao accountDao;
+    public LoginController(AuthenticationManager authenticationManager, JwtProvider jwtProvider, AccountRepo accountRepo, JwtAuthTokenFilter jwtAuthTokenFilter, JwtProvider tokenProvider, ModelMapper mapper, AccountDao accountDao) {
+        super(tokenProvider, accountDao);
         this.authenticationManager = authenticationManager;
         this.jwtProvider = jwtProvider;
         this.accountRepo = accountRepo;
         this.jwtAuthTokenFilter = jwtAuthTokenFilter;
         this.tokenProvider = tokenProvider;
         this.mapper = mapper;
+        this.accountDao = accountDao;
     }
 
     @PostMapping("/login")

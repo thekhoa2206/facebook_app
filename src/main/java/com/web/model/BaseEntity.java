@@ -26,13 +26,13 @@ public class BaseEntity {
 	private Date createdOn;
 
 	@Column(name = "created_by")
-	private int createdBy;
+	private Integer createdBy;
 
 	@Column(name = "modified_on")
 	private Date modifiedOn;
 
 	@Column(name = "modified_by")
-	private int modifiedBy;
+	private Integer modifiedBy;
 
 	public void setCreatedOn(){
 		this.createdOn = new Date();

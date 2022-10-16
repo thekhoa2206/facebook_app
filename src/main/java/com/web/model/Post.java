@@ -19,4 +19,19 @@ public class Post extends BaseEntity {
 
     @Column(name = "account_id")
     private int accountId;
+
+    @Column(name = "can_comment")
+    private boolean canComment;
+
+    @Column(name = "banned")
+    private boolean banned;
+
+    @Column(name = "state")
+    private boolean state;
+
+    @Column(name = "in_campaign")
+    private boolean inCampaign;
+
+    @Column(name = "id_campaign")
+    private int idCampaign;
 }

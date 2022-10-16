@@ -2,6 +2,8 @@ package com.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
+import com.web.config.sercurity.jwt.JwtProvider;
+import com.web.dao.jpa.AccountDao;
 import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.NotFoundException;
 import com.web.dto.exception.UnauthorizedException;
@@ -11,7 +13,6 @@ import lombok.extern.apachecommons.CommonsLog;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -26,9 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @CommonsLog
@@ -37,6 +36,13 @@ public class BaseController {
     public ObjectMapper json;
     @Autowired
     protected MessageSource messageSource;
+    private final JwtProvider tokenProvider;
+    private final AccountDao accountDao;
+
+    public BaseController(JwtProvider tokenProvider, AccountDao accountDao) {
+        this.tokenProvider = tokenProvider;
+        this.accountDao = accountDao;
+    }
 
     @ExceptionHandler(FormValidateException.class)
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
@@ -186,7 +192,20 @@ public class BaseController {
         }
     }
 
-    private void checkJwt(Account account) {
-
+    public Account checkJwt(String token) {
+        Account account = null;
+        if(token == null){
+            throw new UnauthorizedException("authentication.token", "Token không được để trống!");
+        }
+        if (token != null && tokenProvider.validateJwtToken(token)) {
+            String phone = tokenProvider.getUserNameFromJwtToken(token);
+            if(phone != null){
+                account = accountDao.findAccountByPhone(phone);
+                if(account == null){
+                    throw new UnauthorizedException("authentication.account", "Không tìm thấy tài khoản!");
+                }
+            }
+        }
+        return  account;
     }
 }

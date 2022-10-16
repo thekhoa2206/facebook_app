@@ -9,7 +9,6 @@ import com.web.dto.BaseResponse;
 import com.web.dto.account.AccountResponse;
 import com.web.dto.exception.FormValidateException;
 import com.web.model.Account;
-import com.web.model.BaseEntity;
 import com.web.repositories.AccountRepo;
 import lombok.val;
 import org.modelmapper.ModelMapper;
@@ -17,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,6 +29,7 @@ public class SignupController extends BaseController{
     private final AccountDao accountDao;
     private final ModelMapper mapper;
     public SignupController(AccountRepo accountRepo, JwtAuthTokenFilter jwtAuthTokenFilter, JwtProvider tokenProvider, AccountDao accountDao, ModelMapper mapper) {
+        super(tokenProvider, accountDao);
         this.accountRepo = accountRepo;
         this.jwtAuthTokenFilter = jwtAuthTokenFilter;
         this.tokenProvider = tokenProvider;

@@ -21,11 +21,10 @@ public class PostDao {
 
     //Hàm tìm bài post
     public Post findPostById(int id){
-        String sql = "SELECT * FROM post where id = :id";
-        Query query = entityManager.createNativeQuery(sql, Account.class);
-        Post post = null;
+        String sql = "SELECT * FROM post where id = :idPost";
+        Query query = entityManager.createNativeQuery(sql, Post.class);
+        Post post =  (Post) query.setParameter("idPost", id).getSingleResult();
         try{
-            post = (Post) query.setParameter("id", id).getSingleResult();
         }catch (Exception e){
             LOGGER.error("PostDao => ", e.getMessage());
         }
