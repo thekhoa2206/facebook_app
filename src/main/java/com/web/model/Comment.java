@@ -20,4 +20,7 @@ public class Comment extends BaseEntity {
 
     @Column(name = "post_id", length = 100)
     private int postId;
+
+    @Column(name = "account_id")
+    private int accountId;
 }

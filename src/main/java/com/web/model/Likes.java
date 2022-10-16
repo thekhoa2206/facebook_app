@@ -14,4 +14,7 @@ import javax.persistence.Table;
 public class Likes extends BaseEntity{
     @Column(name = "post_id")
     private int postId;
+
+    @Column(name = "account_id")
+    private int accountId;
 }
