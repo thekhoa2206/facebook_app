@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class DataPostResponse {
-    private List<ListPostResponse> data;
+    private ListPostResponse data;
     private int inCampaign;
     private int campaignId;
 

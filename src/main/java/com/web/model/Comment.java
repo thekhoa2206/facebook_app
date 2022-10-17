@@ -18,7 +18,7 @@ public class Comment extends BaseEntity {
     @Type(type="text")
     private String content;
 
-    @Column(name = "post_id", length = 100)
+    @Column(name = "post_id")
     private int postId;
 
     @Column(name = "account_id")

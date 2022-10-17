@@ -21,7 +21,11 @@ public class Post extends BaseEntity {
     private int accountId;
 
     @Column(name = "can_comment")
-    private boolean canComment;
+    private boolean can_comment;
+
+    @Column(name = "can_edit")
+    private boolean can_edit;
+
 
     @Column(name = "banned")
     private boolean banned;
@@ -30,8 +34,8 @@ public class Post extends BaseEntity {
     private boolean state;
 
     @Column(name = "in_campaign")
-    private boolean inCampaign;
+    private boolean in_campaign;
 
     @Column(name = "id_campaign")
-    private int idCampaign;
+    private Integer id_campaign;
 }

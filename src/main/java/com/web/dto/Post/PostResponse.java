@@ -1,6 +1,8 @@
 package com.web.dto.Post;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,12 +21,12 @@ public class PostResponse {
     private Date created;
     private int like;
     private int comment;
-    private boolean is_liked;
-    private boolean is_blocked;
-    private boolean can_comment;
-    private boolean can_edit;
-    private boolean banned;
-    private String state;
+    private int is_liked;
+    private int is_blocked;
+    private int can_comment;
+    private int can_edit;
+    private int banned;
+    private int state;
     private AuthorReponse author;
 
     @Getter

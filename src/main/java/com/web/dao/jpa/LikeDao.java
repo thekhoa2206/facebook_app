@@ -1,6 +1,7 @@
 package com.web.dao.jpa;
 
 import com.web.model.Account;
+import com.web.model.Comment;
 import com.web.model.Likes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,5 +46,18 @@ public class LikeDao {
             LOGGER.error("LikeDao => ", e.getMessage());
         }
         return likes.size();
+    }
+
+    //count like
+    public int countCommentByPostId(int id){
+        String sql = "SELECT * FROM comment where post_id = :postId";
+        Query query = entityManager.createNativeQuery(sql, Comment.class);
+        List<Comment> comments = null;
+        try{
+            comments = query.setParameter("postId", id).getResultList();
+        }catch (Exception e){
+            LOGGER.error("LikeDao => ", e.getMessage());
+        }
+        return comments.size();
     }
 }

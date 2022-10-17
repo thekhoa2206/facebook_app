@@ -32,4 +32,17 @@ public class AccountDao {
         return account;
     }
 
+    //Hàm tìm acoount
+    public Account findAccountById(int id){
+        String sql = "SELECT * FROM account where id = :id";
+        Query query = entityManager.createNativeQuery(sql, Account.class);
+        Account account = null;
+        try{
+            account = (Account) query.setParameter("id", id).getSingleResult();
+        }catch (Exception e){
+            LOGGER.error("accountDao => ", e.getMessage());
+        }
+        return account;
+    }
+
 }
