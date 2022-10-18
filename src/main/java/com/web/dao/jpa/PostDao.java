@@ -30,9 +30,13 @@ public class PostDao {
         }
         return post;
     }
-    public List<Post> findPostByAll(int limit, int index, Integer campaign_id, Integer in_campaign){
+    public List<Post> findPostByAll(int limit, int index, Integer campaign_id, Integer in_campaign, Integer user_id){
         if(campaign_id != null && in_campaign != null){
-            String sql = "SELECT * FROM post where campaign_id =:campaign_id and in_campaign =:in_campaign LIMIT :limit OFFSET :index";
+            String sql = "SELECT * FROM post where id_campaign =:campaign_id and id_campaign =:in_campaign ";
+            if(user_id != null){
+                sql += " and account_id = " + user_id + " ";
+            }
+            sql += " LIMIT :limit OFFSET :index";
             Query query = entityManager.createNativeQuery(sql, Post.class);
             List<Post> posts = null;
             try{
@@ -43,7 +47,11 @@ public class PostDao {
             }
             return posts;
         }else{
-            String sql = "SELECT * FROM post LIMIT :limit OFFSET :index";
+            String sql = "SELECT * FROM post ";
+            if(user_id != null){
+                sql += " where account_id = " + user_id + " ";
+            }
+            sql += " LIMIT :limit OFFSET :index";
             Query query = entityManager.createNativeQuery(sql, Post.class);
             List<Post> posts = null;
             try{
@@ -54,5 +62,27 @@ public class PostDao {
             return posts;
         }
     }
-
+    public List<Post> findPostByAllByLastId(Integer campaign_id){
+        if(campaign_id != null){
+            String sql = "SELECT * FROM post where id_campaign =:id_campaign";
+            Query query = entityManager.createNativeQuery(sql, Post.class);
+            List<Post> posts = null;
+            try{
+                posts  =  query.setParameter("id_campaign", campaign_id).getResultList();
+            }catch (Exception e){
+                LOGGER.error("PostDao => ", e.getMessage());
+            }
+            return posts;
+        }else{
+            String sql = "SELECT * FROM post";
+            Query query = entityManager.createNativeQuery(sql, Post.class);
+            List<Post> posts = null;
+            try{
+                posts  =  query.getResultList();
+            }catch (Exception e){
+                LOGGER.error("PostDao => ", e.getMessage());
+            }
+            return posts;
+        }
+    }
 }

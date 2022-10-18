@@ -5,15 +5,14 @@ import com.web.dao.jpa.*;
 import com.web.dto.BaseResponse;
 import com.web.dto.Post.DataPostResponse;
 import com.web.dto.Post.ListPostResponse;
+import com.web.dto.Post.NewItems;
 import com.web.dto.Post.PostResponse;
 import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.NotFoundException;
 import com.web.dto.like.LikeReponse;
-import com.web.model.File;
-import com.web.model.Likes;
-import com.web.model.Report;
-import com.web.model.TypeReport;
+import com.web.model.*;
 import com.web.repositories.LikesRepo;
+import com.web.repositories.PostRepo;
 import com.web.repositories.ReportRepo;
 import com.web.repositories.TypeReportRepo;
 import lombok.val;
@@ -43,8 +42,9 @@ public class ReportController extends BaseController {
     private final LikeDao likeDao;
     private final ModelMapper mapper;
     private final FileDao fileDao;
+    private final PostRepo postRepo;
 
-    public ReportController(PostDao postDao, ReportDao reportDao, TypeReportDao typeReportDao, JwtProvider tokenProvider, AccountDao accountDao, ReportRepo reportRepo, TypeReportRepo typeReportRepo, LikesRepo likesRepo, LikeDao likeDao, ModelMapper mapper, FileDao fileDao) {
+    public ReportController(PostDao postDao, ReportDao reportDao, TypeReportDao typeReportDao, JwtProvider tokenProvider, AccountDao accountDao, ReportRepo reportRepo, TypeReportRepo typeReportRepo, LikesRepo likesRepo, LikeDao likeDao, ModelMapper mapper, FileDao fileDao, PostRepo postRepo) {
         super(tokenProvider, accountDao);
         this.postDao = postDao;
         this.reportDao = reportDao;
@@ -57,6 +57,7 @@ public class ReportController extends BaseController {
         this.likeDao = likeDao;
         this.mapper = mapper;
         this.fileDao = fileDao;
+        this.postRepo = postRepo;
     }
 
     //api report
@@ -154,12 +155,15 @@ public class ReportController extends BaseController {
         List<Object> data = new ArrayList<>();
         val dataRes = new DataPostResponse();
         val listPostResponse = new ListPostResponse();
-
-        val posts = postDao.findPostByAll(count, index, campaign_id, in_campaign);
+        val posts = postDao.findPostByAll(count, index, campaign_id, in_campaign, user_id);
+        List<Post> postsLastId = null;
+        if(last_id != null && posts != null){
+            postsLastId = posts.stream().filter(i -> i.getId() > last_id).collect(Collectors.toList());
+        }
         List<PostResponse> postResponses = new ArrayList<>();
         int lastId = 0;
         if(posts != null){
-            for (val post : posts) {
+            for (val post : postsLastId) {
                 val postReponse = mapper.map(post, PostResponse.class);
                 postReponse.setDescribed(post.getContent());
                 postReponse.setCreated(post.getCreatedOn());
@@ -191,7 +195,7 @@ public class ReportController extends BaseController {
             lastId = postResponses.get(postResponses.size() - 1).getId();
         }
         listPostResponse.setLastId(lastId);
-        //listPostResponse.setNewItems();
+        listPostResponse.setNewItems(postsLastId.size());
         dataRes.setData(listPostResponse);
         if(campaign_id != null && in_campaign != null){
             dataRes.setCampaignId(campaign_id);
@@ -206,4 +210,23 @@ public class ReportController extends BaseController {
     }
 
     // api check_new_item
+    @PostMapping("/check_new_item")
+    public BaseResponse checkNewItem(@Valid @RequestParam(required = false) Integer last_id, @Valid @RequestParam(required = false) Integer category_id){
+        if(last_id == null)
+            throw new FormValidateException("checkNewItem.last_id", "Trường last_id không được để trống!");
+        val response = new BaseResponse();
+        val posts  = postDao.findPostByAllByLastId(category_id);
+        if(posts != null){
+            val postsResponse = posts.stream().filter(i -> i.getId() > last_id).collect(Collectors.toList());
+            List<Object> data = new ArrayList<>();
+            val newItems = new NewItems();
+            newItems.setNewItem(postsResponse.size());
+            data.add(newItems);
+            response.setData(data);
+        }
+
+        response.setCode(HttpStatus.OK);
+        response.setMessage("Lấy danh sách bài viết thành công");
+        return response;
+    }
 }
