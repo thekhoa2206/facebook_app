@@ -101,7 +101,7 @@ public class PostController extends BaseController {
                     message = "có lỗi phần upvideo" ;
                 }
             } else {
-            
+
             try{
             for( val  file : images){
                 if(file.getSize()>MAX_FILE_SIZE){
