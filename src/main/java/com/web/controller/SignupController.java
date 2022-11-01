@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +39,8 @@ public class SignupController extends BaseController{
     }
 
     @PostMapping("/signup")
-    public BaseResponse signup (@RequestParam(required = false) String phoneNumber, @RequestParam(required = false) String password) {
+    public BaseResponse signup (@RequestParam(required = false) String phoneNumber, @RequestParam(required = false) String password,
+                                @Valid @RequestParam(required = false) String uuid) {
         Account account = null;
         if (phoneNumber == null) {
             throw new FormValidateException("phoneNumber", "Số điện thoại không được để trống!");
@@ -48,12 +50,12 @@ public class SignupController extends BaseController{
             if(account != null)
                 throw new FormValidateException("phoneNumber", "Số điện thoại đã được sử dụng!");
         }
-        UUID uuid = UUID.randomUUID();
         CheckCommon.checkPassword(password);
         Account accountReq = new Account();
         accountReq.setPhoneNumber(phoneNumber);
         accountReq.setPassword(Common.genPassword(password));
         accountReq.setCreatedOn();
+        accountReq.setUuid(uuid);
         val accountx = accountRepo.save(accountReq);
         val response = new BaseResponse();
         response.setCode(HttpStatus.OK);

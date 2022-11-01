@@ -45,4 +45,17 @@ public class AccountDao {
         return account;
     }
 
+    //Hàm tìm acoount
+    public Account findAccountByUuid(String uuid){
+        String sql = "SELECT * FROM account where uuid = :uuid";
+        Query query = entityManager.createNativeQuery(sql, Account.class);
+        Account account = null;
+        try{
+            account = (Account) query.setParameter("uuid", uuid).getSingleResult();
+        }catch (Exception e){
+            LOGGER.error("accountDao => ", e.getMessage());
+        }
+        return account;
+    }
+
 }

@@ -32,7 +32,7 @@ public class Account extends BaseEntity {
 	@Column(name = "uuid", length = 100)
 	private String uuid;
 
-	@Transient
+	@Column(name = "token")
 	private String token;
 
 
