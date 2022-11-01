@@ -38,4 +38,9 @@ public class Post extends BaseEntity {
 
     @Column(name = "id_campaign")
     private Integer id_campaign;
+    @Column(name = "auto_block")
+    private boolean auto_block;
+
+    @Column(name = "auto_accept")
+    private boolean auto_accept;
 }
