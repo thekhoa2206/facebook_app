@@ -19,11 +19,11 @@ public class JwtProvider {
     @Value("${app.jwtExpiration}")
     private int jwtExpiration;
 
-    public String generateJwtToken(Authentication authentication, String uuid) {
+    public String generateJwtToken(Authentication authentication) {
 
         UserPrinciple userPrincipal = (UserPrinciple) authentication.getPrincipal();
 
-        return Jwts.builder().setSubject((userPrincipal.getUsername())).setId(uuid).setIssuedAt(new Date())
+        return Jwts.builder().setSubject((userPrincipal.getUsername())).setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpiration * 1000))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
     }

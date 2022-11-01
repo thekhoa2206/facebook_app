@@ -1,6 +1,5 @@
 package com.web.dao.jpa;
 
-import com.web.model.Account;
 import com.web.model.Post;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository(value = "PostDao")

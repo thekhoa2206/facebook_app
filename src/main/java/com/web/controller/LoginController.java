@@ -47,11 +47,18 @@ public class LoginController extends BaseController {
     }
 
     @PostMapping("/login")
-    public BaseResponse login(@Valid @RequestParam(required = false) String phoneNumber, @Valid @RequestParam(required = false) String password) {
+    public BaseResponse login(@Valid @RequestParam(required = false) String phoneNumber, @Valid @RequestParam(required = false) String password,
+                              @Valid @RequestParam(required = false) String uuid) {
         if (phoneNumber == null) {
             throw new FormValidateException("phoneNumber", "Số điện thoại không được để trống!");
         } else {
             CheckCommon.validatePhone(phoneNumber);
+        }
+        if(uuid == null){
+            throw new FormValidateException("uuid", "uuid không được để trống!");
+        }
+        if(phoneNumber.equals(password)){
+            throw new FormValidateException("password", "Mật khẩu không được để giống số điện thoại!");
         }
         Account accountReq = new Account();
         CheckCommon.checkPassword(password);
@@ -67,12 +74,10 @@ public class LoginController extends BaseController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(phoneNumber, password));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        if(accountReq.getUuid() != null){
-            throw new FormValidateException("account", "Tài khoản đã được đăng nhập!");
-        }
-        String uuid = UUID.randomUUID().toString();
-        String jwt = jwtProvider.generateJwtToken(authentication, uuid);
+
+        String jwt = jwtProvider.generateJwtToken(authentication);
         accountReq.setUuid(uuid);
+        accountReq.setToken(jwt);
         accountRepo.save(accountReq);
         val response = new BaseResponse();
         if(accountReq != null && jwt != null){
@@ -104,15 +109,18 @@ public class LoginController extends BaseController {
                 if(account == null)
                     throw new UnauthorizedException("logout.account","Không tìm thấy tài khoản!");
                 if(account != null){
-                    if(account.get().getUuid() == null)
-                        throw new UnauthorizedException("logout.account","Tài khoản không xác định!");
-
-                    val accountReq = account.get();
-                    accountReq.setUuid(null);
-                    accountRepo.save(accountReq);
-                    if(accountReq != null){
-                        response.setCode(HttpStatus.OK);
-                        response.setMessage("Đăng xuất thành công!");
+                    if(account.get().getToken() == null){
+                        throw new  UnauthorizedException("logout.account","Tài khoản không xác định!");
+                    } else if(!account.get().getToken().equals(jwt)){
+                        throw new  UnauthorizedException("logout.account","Tài khoản không xác định!");
+                    }else{
+                        val accountReq = account.get();
+                        accountReq.setToken(null);
+                        accountRepo.save(accountReq);
+                        if(accountReq != null){
+                            response.setCode(HttpStatus.OK);
+                            response.setMessage("Đăng xuất thành công!");
+                        }
                     }
                 }
             }
