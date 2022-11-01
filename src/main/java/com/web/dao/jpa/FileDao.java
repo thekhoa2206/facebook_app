@@ -30,4 +30,19 @@ public class FileDao {
         }
         return files;
     }
+    public File findPostById(int postId,List id){
+        String sql = "SELECT * FROM file where post_id = :postId and id:id";
+        Query query = entityManager.createNativeQuery(sql, File.class);
+        File files = null;
+        try{
+            files = (File) query
+                    .setParameter("postId", postId)
+                    .setParameter("id", id)
+                    .getSingleResult();
+        }catch (Exception e){
+            LOGGER.error("FileDao => ", e.getMessage());
+        }
+        return files;
+    }
+
 }

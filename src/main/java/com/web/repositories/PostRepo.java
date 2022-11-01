@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PostRepo extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
+public interface PostRepo extends JpaRepository<Post, Integer>, JpaSpecificationExecutor<Post> {
 }
