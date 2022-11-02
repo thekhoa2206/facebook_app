@@ -194,7 +194,7 @@ public class BaseController {
 
     public Account checkJwt(String token) {
         Account account = null;
-        if(token == null){
+        if(token == null || token.isEmpty()){
             throw new UnauthorizedException("authentication.token", "Token không được để trống!");
         }
         if (token != null && tokenProvider.validateJwtToken(token)) {
@@ -203,6 +203,10 @@ public class BaseController {
                 account = accountDao.findAccountByPhone(phone);
                 if(account == null){
                     throw new UnauthorizedException("authentication.account", "Không tìm thấy tài khoản!");
+                }else{
+                    if(!account.getToken().equals(token)){
+                        throw new UnauthorizedException("authentication.account", "Sai phiên đăng nhập! Cần đăng nhập lại");
+                    }
                 }
             }
         }

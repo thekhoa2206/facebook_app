@@ -1,6 +1,7 @@
 package com.web.config.sercurity.jwt;
 
 import com.web.dto.account.UserPrinciple;
+import com.web.dto.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +34,15 @@ public class JwtProvider {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException e) {
-            logger.error("Invalid JWT signature -> Message: {} ", e);
+            throw new UnauthorizedException("authentication", "Mã Token không hợp lệ");
         } catch (MalformedJwtException e) {
-            logger.error("Invalid JWT token -> Message: {}", e);
+            throw new UnauthorizedException("authentication", "Mã Token không hợp lệ");
         } catch (ExpiredJwtException e) {
-            logger.error("Expired JWT token -> Message: {}", e);
+            throw new UnauthorizedException("authentication", "Phiên đăng nhập hết hạn");
         } catch (UnsupportedJwtException e) {
-            logger.error("Unsupported JWT token -> Message: {}", e);
+            throw new UnauthorizedException("authentication", "Token không được hỗ trợ");
         } catch (IllegalArgumentException e) {
-            logger.error("JWT claims string is empty -> Message: {}", e);
+            logger.error("JWT claims string is empty -> Message: {}", e.getMessage());
         }
 
         return false;

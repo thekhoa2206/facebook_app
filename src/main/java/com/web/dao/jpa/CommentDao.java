@@ -19,9 +19,9 @@ public class CommentDao {
     private EntityManager entityManager;
     private static final Logger LOGGER = LoggerFactory.getLogger(CommentDao.class.toString());
     public List<Comment> findCommentAll(int id, int index, int limit){
-        String sql = "SELECT * FROM comment where id = :idPost";
+        String sql = "SELECT * FROM comment where post_id = :idPost";
         sql += " LIMIT :limit OFFSET :index";
-        Query query = entityManager.createNativeQuery(sql, Post.class);
+        Query query = entityManager.createNativeQuery(sql, Comment.class);
         List <Comment> comments = null;
         comments =  query.setParameter("idPost", id).setParameter("limit", limit).setParameter("index", index).getResultList();
         try{
@@ -30,12 +30,12 @@ public class CommentDao {
         }
         return comments;
     }
-    public Comment findCommentByPostId(int id, int index, int limit){
-        String sql = "SELECT * FROM comment where id = :idPost";
+    public List<Comment> findCommentByPostId(int id, int index, int limit){
+        String sql = "SELECT * FROM comment where post_id = :idPost ";
         sql += " LIMIT :limit OFFSET :index";
-        Query query = entityManager.createNativeQuery(sql, Post.class);
-       Comment comments = null;
-        comments =(Comment)  query.setParameter("idPost", id).setParameter("limit", limit).setParameter("index", index).getSingleResult();
+        Query query = entityManager.createNativeQuery(sql, Comment.class);
+        List<Comment> comments = null;
+        comments = query.setParameter("idPost", id).setParameter("limit", limit).setParameter("index", index).getResultList();
         try{
         }catch (Exception e){
             LOGGER.error("CommnetDao => ", e.getMessage());
