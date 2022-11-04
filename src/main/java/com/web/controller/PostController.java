@@ -399,6 +399,9 @@ public class PostController extends BaseController {
         }
         try {
             Comment comments = commentRepo.findById(id_comment).get();
+            if(comments.getAccountId() != account.getId()){
+                throw new FormValidateException("errors", "Không được sửa comment của người khác");
+            }
             if(comments != null){
                 comments.setContent(comment);
                 comments.setAccountId(account.getId());
