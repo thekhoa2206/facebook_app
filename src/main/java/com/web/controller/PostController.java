@@ -78,7 +78,9 @@ public class PostController extends BaseController {
                                @Valid @RequestParam(required = false) String status) throws IOException {
         // xử lý upload file khi người dùng nhấn nút thực hiện
         int MAX_FILE_SIZE = 1024 * 1024 * 15; // 40MB
-        if (!video.isEmpty() && !images.isEmpty()) {
+        val checkHaveImages = images.size() > 1 ||(images.size() ==1 && !images.get(0).getOriginalFilename().isEmpty());
+        val checkHaveVideo = video.size() > 1 ||(video.size() ==1 && !video.get(0).getOriginalFilename().isEmpty());
+        if (checkHaveImages && checkHaveVideo) {
             throw new FormValidateException("upload", "không thể cùng thêm ảnh và video");
         }
         val account = checkJwt(token);
