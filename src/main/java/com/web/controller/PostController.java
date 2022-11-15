@@ -78,8 +78,8 @@ public class PostController extends BaseController {
     @PostMapping("/post")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse create(@Valid @RequestParam(required = false) String token,
-                               @Valid @RequestParam(required = false) List<MultipartFile> video,
-                               @Valid @RequestParam(required = false) List<MultipartFile> images,
+                               @Valid @RequestParam(required = false ,defaultValue = "") List<MultipartFile> video,
+                               @Valid @RequestParam(required = false,defaultValue = "" ) List<MultipartFile> images,
                                @Valid @RequestParam(required = false) String described,
                                @Valid @RequestParam(required = false) String status) throws IOException {
         // xử lý upload file khi người dùng nhấn nút thực hiện
@@ -93,8 +93,8 @@ public class PostController extends BaseController {
         Post postdata = null;
         postdata = postService.savePost(account, described, status);
         String message = "";
-        if (!video.isEmpty()) {
-            if(images.size() > 4 || video.size() > 4){throw new Exception("1008","Maximum number of images", "Số lượng images vượt quá quy định");}
+
+        if (checkHaveVideo ) {
             try {
                 for (val file : video) {
                     if (file.getSize() > MAX_FILE_SIZE) {
@@ -112,9 +112,9 @@ public class PostController extends BaseController {
             } catch (Exception e) {
                 throw new Exception("1007","Upload File Failed", "upload thất bại");
             }
-        } else {
-
-            try {
+        }
+            if(checkHaveImages) {
+                try {
                 for (val file : images) {
                     if (file.getSize() > MAX_FILE_SIZE) {
                         throw new Exception("1006","File size is too big", "Cỡ file quá kích cỡ quy định");
@@ -132,6 +132,7 @@ public class PostController extends BaseController {
                 throw new Exception("1007","Upload File Failed", "upload thất bại");
             }
         }
+        message = "OK";
         val data = new ArrayList<>();
         val dataResponse = new PostDataRepone();
         dataResponse.setId(postdata.getId());
@@ -160,6 +161,8 @@ public class PostController extends BaseController {
                              @Valid @RequestParam(required = false) Boolean auto_block
     ) throws IOException {
         int MAX_FILE_SIZE = 1024 * 1024 * 15; // 40MB
+        val checkHaveImages = images.size() > 1 ||(images.size() ==1 && !images.get(0).getOriginalFilename().isEmpty());
+        val checkHaveVideo = video.size() > 1 ||(video.size() ==1 && !video.get(0).getOriginalFilename().isEmpty());
         val account = checkJwt(token);
         if (id == null) {
             throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
@@ -171,13 +174,12 @@ public class PostController extends BaseController {
         if (account.getId() != post.getAccountId()) {
             throw new Exception("1018","Do not edit other people's posts", "Không thể sửa bài viết của người khác");
         }
-        val checkHaveImages = images.size() > 1 ||(images.size() ==1 && !images.get(0).getOriginalFilename().isEmpty());
-        val checkHaveVideo = video.size() > 1 ||(video.size() ==1 && !video.get(0).getOriginalFilename().isEmpty());
+
         if (checkHaveImages && checkHaveVideo) {
             throw new Exception("1017","Cannot add the image and video", "không thể cùng thêm ảnh và video");
         }
         String message = "";
-        if (!video.isEmpty()) {
+        if (checkHaveVideo) {
             try {
                 for (val file : video) {
                     if (file.getSize() > MAX_FILE_SIZE) {
@@ -197,7 +199,7 @@ public class PostController extends BaseController {
                 throw new Exception("1007","Upload File Failed", "upload thất bại");
             }
         }
-        if (images != null && !images.isEmpty()) {
+        if (checkHaveImages) {
             try {
                 for (val file : images) {
                     if (file.getSize() > MAX_FILE_SIZE) {
@@ -230,9 +232,14 @@ public class PostController extends BaseController {
         post.setContent(described);
         post.setAuto_accept(true);
         postRepo.save(post);
+        val data = new ArrayList<>();
+        val dataResponse = new PostDataRepone();
+        dataResponse.setUrl(account.getName() + "/post/" + id);
+        data.add(dataResponse);
         val response = new BaseResponse();
         response.setCode("1000");
         response.setMessage(message);
+        response.setData(data);
         return response;
 
     }
