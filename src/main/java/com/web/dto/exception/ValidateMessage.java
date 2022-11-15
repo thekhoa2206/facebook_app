@@ -11,8 +11,7 @@ import java.util.Set;
 @JsonRootName("data_error")
 @JsonTypeName("data_error")
 public class ValidateMessage {
-    private int status;
-    private Map<String, Object> errors;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Set<Integer> errorCodes;
+    private String code;
+    private String message;
+    private String note;
 }

@@ -7,6 +7,7 @@ import com.web.dto.Post.DataPostResponse;
 import com.web.dto.Post.ListPostResponse;
 import com.web.dto.Post.NewItems;
 import com.web.dto.Post.PostResponse;
+import com.web.dto.exception.Exception;
 import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.NotFoundException;
 import com.web.dto.like.LikeReponse;
@@ -66,13 +67,13 @@ public class ReportController extends BaseController {
                                @Valid @RequestParam(required = false) String subject, @Valid @RequestParam(required = false) String details) {
         val account = checkJwt(token);
         if (id == null) {
-            throw new FormValidateException("report.id", "Mã Id không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         if (subject == null) {
-            throw new FormValidateException("report.id", "Subject không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         if (details == null) {
-            throw new FormValidateException("report.id", "Details không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         TypeReport typeReport = null;
         if (subject != null) {
@@ -87,7 +88,7 @@ public class ReportController extends BaseController {
         }
         val post = postDao.findPostById(id);
         if (post == null)
-            throw new NotFoundException("Không tìm thấy bài viết!");
+            throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
         if (post != null) {
             val report = new Report();
             report.setAccountId(account.getId());
@@ -99,8 +100,8 @@ public class ReportController extends BaseController {
             reportRepo.save(report);
         }
         val response = new BaseResponse();
-        response.setCode(HttpStatus.OK);
-        response.setMessage("Bài viết đang được xem xét!");
+        response.setCode("1000");
+        response.setMessage("OK");
         return response;
     }
 
@@ -109,17 +110,16 @@ public class ReportController extends BaseController {
     public BaseResponse like(@Valid @RequestParam(required = false) String token, @Valid @RequestParam(required = false) Integer id) {
         val account = checkJwt(token);
         if (id == null) {
-            throw new FormValidateException("like.id", "Mã Id không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         val response = new BaseResponse();
         val post = postDao.findPostById(id);
         if (post == null)
-            throw new NotFoundException("Không tìm thấy bài viết!");
+            throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
         if (post != null) {
             val like = likeDao.findLikeByPostIdAndAccountId(post.getId(), account.getId());
             if (like != null) {
                 likesRepo.delete(like);
-                response.setMessage("Bài viết được giảm thêm một like bởi " + (account.getName() != null ? account.getName() : "người dùng"));
             } else {
                 val likes = new Likes();
                 likes.setAccountId(account.getId());
@@ -127,7 +127,6 @@ public class ReportController extends BaseController {
                 likes.setCreatedOn();
                 likes.setCreatedBy(account.getId());
                 likesRepo.save(likes);
-                response.setMessage("Bài viết được tăng thêm một like bởi " + (account.getName() != null ? account.getName() : "người dùng"));
             }
             val likeRes = new LikeReponse();
             val countLike = likeDao.countLikeByPostId(post.getId());
@@ -136,7 +135,8 @@ public class ReportController extends BaseController {
             data.add(likeRes);
             response.setData(data);
         }
-        response.setCode(HttpStatus.OK);
+        response.setCode("1000");
+        response.setMessage("OK");
         return response;
     }
 
@@ -148,9 +148,9 @@ public class ReportController extends BaseController {
                                     @Valid @RequestParam(required = false) Integer campaign_id) {
         val account = checkJwt(token);
         if(count == null)
-            throw new FormValidateException("get_list_post.count", "Trường Count không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         if(index == null)
-            throw new FormValidateException("get_list_post.index", "Trường Index không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         List<DataPostResponse> listData = new ArrayList<>();
         List<Object> data = new ArrayList<>();
         val dataRes = new DataPostResponse();
@@ -204,8 +204,8 @@ public class ReportController extends BaseController {
         data.add(dataRes);
         val response = new BaseResponse();
         response.setData(data);
-        response.setCode(HttpStatus.OK);
-        response.setMessage("Lấy danh sách bài viết thành công");
+        response.setCode("1000");
+        response.setMessage("OK");
         return response;
     }
 
@@ -213,7 +213,7 @@ public class ReportController extends BaseController {
     @PostMapping("/check_new_item")
     public BaseResponse checkNewItem(@Valid @RequestParam(required = false) Integer last_id, @Valid @RequestParam(required = false) Integer category_id){
         if(last_id == null)
-            throw new FormValidateException("checkNewItem.last_id", "Trường last_id không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         val response = new BaseResponse();
         val posts  = postDao.findPostByAllByLastId(category_id);
         if(posts != null){
@@ -225,8 +225,8 @@ public class ReportController extends BaseController {
             response.setData(data);
         }
 
-        response.setCode(HttpStatus.OK);
-        response.setMessage("Lấy danh sách bài viết thành công");
+        response.setCode("1000");
+        response.setMessage("OK");
         return response;
     }
 }

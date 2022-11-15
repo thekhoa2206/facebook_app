@@ -6,6 +6,7 @@ import com.web.config.sercurity.jwt.JwtProvider;
 import com.web.dao.jpa.AccountDao;
 import com.web.dto.BaseResponse;
 import com.web.dto.account.AccountResponse;
+import com.web.dto.exception.Exception;
 import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.UnauthorizedException;
 import com.web.model.Account;
@@ -50,26 +51,25 @@ public class LoginController extends BaseController {
     public BaseResponse login(@Valid @RequestParam(required = false) String phoneNumber, @Valid @RequestParam(required = false) String password,
                               @Valid @RequestParam(required = false) String uuid) {
         if (phoneNumber == null) {
-            throw new FormValidateException("phoneNumber", "Số điện thoại không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         } else {
             CheckCommon.validatePhone(phoneNumber);
         }
         if(uuid == null){
-            throw new FormValidateException("uuid", "uuid không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         if(phoneNumber.equals(password)){
-            throw new FormValidateException("password", "Mật khẩu không được để giống số điện thoại!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         Account accountReq = new Account();
         CheckCommon.checkPassword(password);
         val account  = accountRepo.findByPhoneNumber(phoneNumber);
         if(account == null)
-            throw new FormValidateException("account", "Không tìm thấy tài khoản!");
+            throw new Exception("9995","User is not validated", "Không có người dùng này");
         if(account != null){
             accountReq = account.get();
             if(!BCrypt.checkpw(password, account.get().getPassword()))
-                throw new FormValidateException("password", "Mật khẩu sai!");
-
+                throw new Exception("1014","Password wrong", "Mật khẩu sai");
         }
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(phoneNumber, password));
@@ -86,8 +86,8 @@ public class LoginController extends BaseController {
             accountResponse.setToken(jwt);
             data.add(accountResponse);
             response.setData(data);
-            response.setCode(HttpStatus.OK);
-            response.setMessage("Đăng nhập thành công!");
+            response.setCode("1000");
+            response.setMessage("OK");
         }
         return response;
     }
@@ -95,31 +95,31 @@ public class LoginController extends BaseController {
     public BaseResponse logout(@RequestParam(required = false) String token) {
         String jwt = token; // lấy jwt từ request
         if(jwt == null)
-            throw new UnauthorizedException("logout.infomation","Không có thông tin đăng nhập!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
 
         val response = new BaseResponse();
         if (jwt != null && tokenProvider.validateJwtToken(jwt)) {
             String phone = tokenProvider.getUserNameFromJwtToken(jwt); // lấy username từ jwt
 
             if(phone == null)
-                throw new UnauthorizedException("logout.phone","Thông tin số điện thoại của tài khoản sai!");
+                throw new Exception("9995","User is not validated", "Không có người dùng này");
             else
             {
                 val account  = accountRepo.findByPhoneNumber(phone);
                 if(account == null)
-                    throw new UnauthorizedException("logout.account","Không tìm thấy tài khoản!");
+                    throw new Exception("9995","User is not validated", "Không có người dùng này");
                 if(account != null){
                     if(account.get().getToken() == null){
-                        throw new  UnauthorizedException("logout.account","Tài khoản không xác định!");
+                        throw new Exception("9995","User is not validated", "Không có người dùng này");
                     } else if(!account.get().getToken().equals(jwt)){
-                        throw new  UnauthorizedException("logout.account","Tài khoản không xác định!");
+                        throw new Exception("9995","User is not validated", "Không có người dùng này");
                     }else{
                         val accountReq = account.get();
                         accountReq.setToken(null);
                         accountRepo.save(accountReq);
                         if(accountReq != null){
-                            response.setCode(HttpStatus.OK);
-                            response.setMessage("Đăng xuất thành công!");
+                            response.setCode("1000");
+                            response.setMessage("OK");
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package com.web.common;
 
+import com.web.dto.exception.Exception;
 import com.web.dto.exception.FormValidateException;
 
 import java.util.regex.Matcher;
@@ -13,7 +14,7 @@ public class CheckCommon {
             return email;
         }
         else {
-            throw new FormValidateException("email.format", "Email không đúng định dạng");
+            throw new Exception("1015","Email wrong format", "Email không đúng định dạng");
         }
     }
 
@@ -24,7 +25,7 @@ public class CheckCommon {
             return;
         }
         else {
-            throw new FormValidateException("phone.format","Phone không đúng định dạng");
+            throw new Exception("1016","Phone wrong format", "Số điện thoại không đúng định dạng");
         }
     }
 
@@ -32,13 +33,13 @@ public class CheckCommon {
     public static void checkPassword(String password){
         if(password != null){
             if (password.length() > 10 && password.length() < 6) {
-                throw new FormValidateException("password.format","Mật khẩu không đúng định dạng");
+                throw new Exception("1017","Password wrong format", "Mật khẩu không đúng định dạng");
             }
             else {
                 return;
             }
         } else
-            throw new FormValidateException("phoneNumber", "Số điện thoại không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
     }
 //
 //    // Hàm validate username

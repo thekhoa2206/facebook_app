@@ -1,10 +1,15 @@
 package com.web.controller;
 
+import com.ibm.icu.text.DateFormat;
+import com.ibm.icu.text.SimpleDateFormat;
 import com.web.config.sercurity.jwt.JwtProvider;
 import com.web.dao.jpa.*;
 import com.web.dto.BaseResponse;
 import com.web.dto.Post.CommentReponse;
 import com.web.dto.Post.PostDataRepone;
+import com.web.dto.Post.PostResponse;
+import com.web.dto.Post.PostResponseId;
+import com.web.dto.exception.Exception;
 import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.NotFoundException;
 import com.web.dto.exception.UnauthorizedException;
@@ -25,6 +30,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -81,17 +87,18 @@ public class PostController extends BaseController {
         val checkHaveImages = images.size() > 1 ||(images.size() ==1 && !images.get(0).getOriginalFilename().isEmpty());
         val checkHaveVideo = video.size() > 1 ||(video.size() ==1 && !video.get(0).getOriginalFilename().isEmpty());
         if (checkHaveImages && checkHaveVideo) {
-            throw new FormValidateException("upload", "không thể cùng thêm ảnh và video");
+            throw new Exception("1017","Cannot add the image and video", "không thể cùng thêm ảnh và video");
         }
         val account = checkJwt(token);
         Post postdata = null;
         postdata = postService.savePost(account, described, status);
         String message = "";
         if (!video.isEmpty()) {
+            if(images.size() > 4 || video.size() > 4){throw new Exception("1008","Maximum number of images", "Số lượng images vượt quá quy định");}
             try {
                 for (val file : video) {
                     if (file.getSize() > MAX_FILE_SIZE) {
-                        throw new FormValidateException("video", "File video quá kích cỡ quy định");
+                        throw new Exception("1006","File size is too big", "Cỡ file quá kích cỡ quy định");
                     }
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                     File videos = new File();
@@ -100,17 +107,17 @@ public class PostController extends BaseController {
                     videos.setPost_id(postdata.getId());
                     fileRepo.save(videos);
                 }
-                message = "Tạo bài viết thành công ";
+                message = "OK";
 
             } catch (Exception e) {
-                message = "có lỗi phần upvideo";
+                throw new Exception("1007","Upload File Failed", "upload thất bại");
             }
         } else {
 
             try {
                 for (val file : images) {
                     if (file.getSize() > MAX_FILE_SIZE) {
-                        throw new FormValidateException("ảnh", "File ảnh quá kích cỡ quy định");
+                        throw new Exception("1006","File size is too big", "Cỡ file quá kích cỡ quy định");
                     }
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                     File image = new File();
@@ -119,10 +126,10 @@ public class PostController extends BaseController {
                     image.setPost_id(postdata.getId());
                     fileRepo.save(image);
                 }
-                message = "Tạo bài viết thành công ";
+                message = "OK";
 
             } catch (Exception e) {
-                message = "có lỗi phần up ảnh!";
+                throw new Exception("1007","Upload File Failed", "upload thất bại");
             }
         }
         val data = new ArrayList<>();
@@ -131,7 +138,7 @@ public class PostController extends BaseController {
         dataResponse.setUrl(account.getName() + "/post/" + postdata.getId());
         data.add(dataResponse);
         val response = new BaseResponse();
-        response.setCode(HttpStatus.OK);
+        response.setCode("1000");
         response.setMessage(message);
         response.setData(data);
         return response;
@@ -155,25 +162,26 @@ public class PostController extends BaseController {
         int MAX_FILE_SIZE = 1024 * 1024 * 15; // 40MB
         val account = checkJwt(token);
         if (id == null) {
-            throw new FormValidateException("erros", "id bài viết khng được để trống");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         val post = postDao.findPostById(id);
         if (post == null) {
-            throw new FormValidateException("erros", "không thể tìm thấy bài viết");
+            throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
         }
         if (account.getId() != post.getAccountId()) {
-            throw new FormValidateException("erros", "Không thể sửa bài viết của người khác!");
+            throw new Exception("1018","Do not edit other people's posts", "Không thể sửa bài viết của người khác");
         }
-        if (!video.isEmpty() && !images.isEmpty()) {
-            throw new FormValidateException("erros", "không thể cùng thêm ảnh và video");
+        val checkHaveImages = images.size() > 1 ||(images.size() ==1 && !images.get(0).getOriginalFilename().isEmpty());
+        val checkHaveVideo = video.size() > 1 ||(video.size() ==1 && !video.get(0).getOriginalFilename().isEmpty());
+        if (checkHaveImages && checkHaveVideo) {
+            throw new Exception("1017","Cannot add the image and video", "không thể cùng thêm ảnh và video");
         }
         String message = "";
         if (!video.isEmpty()) {
             try {
                 for (val file : video) {
                     if (file.getSize() > MAX_FILE_SIZE) {
-
-                        throw new FormValidateException("video", "File video quá kích cỡ quy định");
+                        throw new Exception("1006","File size is too big", "Cỡ file quá kích cỡ quy định");
                     }
 
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -183,17 +191,17 @@ public class PostController extends BaseController {
                     videos.setPost_id(id);
                     fileRepo.save(videos);
                 }
-                message = "Tạo bài viết thành công ";
+                message = "OK";
 
             } catch (Exception e) {
-                message = "có lỗi phần upvideo";
+                throw new Exception("1007","Upload File Failed", "upload thất bại");
             }
         }
         if (images != null && !images.isEmpty()) {
             try {
                 for (val file : images) {
                     if (file.getSize() > MAX_FILE_SIZE) {
-                        throw new FormValidateException("ảnh", "File ảnh quá kích cỡ quy định");
+                        throw new Exception("1006","File size is too big", "Cỡ file quá kích cỡ quy định");
                     }
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                     File image = new File();
@@ -202,10 +210,9 @@ public class PostController extends BaseController {
                     image.setPost_id(id);
                     fileRepo.save(image);
                 }
-                message = "Sửa bài viết thành công ";
+                message = "OK";
             } catch (Exception e) {
-                message = "có lỗi phần up ảnh!";
-
+                throw new Exception("1007","Upload File Failed", "upload thất bại");
             }
         }
         ;
@@ -213,7 +220,7 @@ public class PostController extends BaseController {
         if (image_del != null && !image_del.isEmpty()) {
             val File = fileDao.findPostById(id, image_del);
             if (File == null) {
-                throw new FormValidateException("erros", "file ảnh không có trong bài viết");
+                throw new Exception("1019","Image is not in post", "File ảnh không có trong bài viết");
             }
             if (File != null) {
 
@@ -224,7 +231,7 @@ public class PostController extends BaseController {
         post.setAuto_accept(true);
         postRepo.save(post);
         val response = new BaseResponse();
-        response.setCode(HttpStatus.OK);
+        response.setCode("1000");
         response.setMessage(message);
         return response;
 
@@ -238,20 +245,20 @@ public class PostController extends BaseController {
         val account = checkJwt(token);
         long Id = id.longValue();
         if (id == null) {
-            throw new FormValidateException("erros", "id bài viết khng được để trống");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         val post = postDao.findPostById(id);
         if (post == null) {
-            throw new FormValidateException("erros", "không thể tìm thấy bài viết");
+            throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
         }
         if (account.getId() != post.getAccountId()) {
-            throw new FormValidateException("erros", "Không thể xóa bài viết của người khác!");
+            throw new Exception("1020","Do not edit other people's posts", "Không thể xóa bài viết của người khác");
         }
         postRepo.deleteById(id);
 
         val response = new BaseResponse();
-        response.setCode(HttpStatus.OK);
-        response.setMessage("xóa bài viết thành công");
+        response.setCode("1000");
+        response.setMessage("OK");
         return response;
     }
 
@@ -265,15 +272,15 @@ public class PostController extends BaseController {
     ) throws IOException {
         val account = checkJwt(token);
         if (id == null) {
-            throw new FormValidateException("erros", "id bài viết khng được để trống");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         if (index == null) {
-            throw new FormValidateException("erros", "index comment không được để trống");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
-        if (count == null) throw new FormValidateException("erros", "index comment không được để trống");
+        if (count == null) throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         val comments = commentDao.findCommentAll(id, index, count);
         if (comments == null) {
-            throw new FormValidateException("erros", "không thể tìm thấy bài viết");
+            throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
         }
         val data = new ArrayList<>();
         for (val comment : comments) {
@@ -283,6 +290,12 @@ public class PostController extends BaseController {
             dataResponse.setCreated(account.getName());
 
             val post = postDao.findPostById(id);
+            if (post == null) {
+                throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
+            }
+            if(post.getAccountId() != account.getId()){
+                throw new Exception("1009","Not access", "Không có quyền truy cập tài nguyên");
+            }
             val acounts = accountDao.findAccountById(post.getAccountId());
             List<CommentReponse.PosterReponse> posters = new ArrayList<>();
             CommentReponse.PosterReponse poster = new CommentReponse.PosterReponse();
@@ -294,8 +307,8 @@ public class PostController extends BaseController {
             data.add(dataResponse);
         }
         val response = new BaseResponse();
-        response.setCode(HttpStatus.OK);
-        response.setMessage("Lấy comment thành công");
+        response.setCode("1000");
+        response.setMessage("OK");
         response.setData(data);
         return response;
     }
@@ -311,18 +324,21 @@ public class PostController extends BaseController {
     ) throws IOException {
         val account = checkJwt(token);
         if (id == null) {
-            throw new FormValidateException("erros", "id bài viết không được để trống");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         if (index == null) {
-            throw new FormValidateException("erros", "index comment không được để trống");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
-        if (count == null) throw new FormValidateException("erros", "index comment không được để trống");
+        if (count == null) throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
 
-        if (comment == null) throw new FormValidateException("erros", "comment bài viết không được để trống");
+        if (comment == null) throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         if (id != null) {
             val post = postDao.findPostById(id);
             if (post == null) {
-                throw new NotFoundException("Không tìm thấy bài viết!");
+                throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
+            }
+            if(post.getAccountId() != account.getId()){
+                throw new Exception("1009","Not access", "Không có quyền truy cập tài nguyên");
             }
         }
         try {
@@ -333,9 +349,8 @@ public class PostController extends BaseController {
             comments.setCreatedOn();
             commentRepo.save(comments);
         } catch (Exception e) {
-            System.out.printf("lỗi nè", e.getMessage());
-        }
-        ;
+            throw new Exception("9999","Exception error", "Lỗi exception");
+        };
         val commentDetails = commentDao.findCommentByPostId(id, index, count);
         val data = new ArrayList<>();
 
@@ -366,8 +381,8 @@ public class PostController extends BaseController {
         }
         data.add(dataRes);
         val response = new BaseResponse();
-        response.setCode(HttpStatus.OK);
-        response.setMessage("add coment thành công");
+        response.setCode("1000");
+        response.setMessage("OK");
         response.setData(data);
         return response;
     }
@@ -385,24 +400,24 @@ public class PostController extends BaseController {
     ) throws IOException {
         val account = checkJwt(token);
         if (id == null) {
-            throw new FormValidateException("errors", "id bài viết không được để trống");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
         if (index == null) {
-            throw new FormValidateException("errors", "index comment không được để trống");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
-        if (count == null) throw new FormValidateException("errors", "index comment không được để trống");
+        if (count == null)  throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
 
-        if (comment == null) throw new FormValidateException("errors", "comment bài viết không được để trống");
+        if (comment == null)  throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         if (id != null) {
             val post = postDao.findPostById(id);
             if (post == null) {
-                throw new NotFoundException("Không tìm thấy bài viết!");
+                throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
             }
         }
         try {
             Comment comments = commentRepo.findById(id_comment).get();
             if(comments.getAccountId() != account.getId()){
-                throw new FormValidateException("errors", "Không được sửa comment của người khác");
+                throw new Exception("1009","Not access", "Không có quyền truy cập tài nguyên");
             }
             if(comments != null){
                 comments.setContent(comment);
@@ -411,14 +426,15 @@ public class PostController extends BaseController {
                 commentRepo.save(comments);
             }
         } catch (Exception e) {
-            System.out.printf("lỗi nè", e.getMessage());
-        }
-        ;
+            throw new Exception("1001","Can not connect to DB", "Lỗi mất kết nối DB/hoặc thực thi câu SQL");
+        };
         val commentDetails = commentDao.findCommentByPostId(id, index, count);
         val data = new ArrayList<>();
 
         val post = postDao.findPostById(id);
-
+        if(post.getAccountId() != account.getId()){
+            throw new Exception("1009","Not access", "Không có quyền truy cập tài nguyên");
+        }
 
         List<CommentReponse> dataRes = new ArrayList<>();
         for (val commentDetail : commentDetails) {
@@ -444,10 +460,83 @@ public class PostController extends BaseController {
         }
         data.add(dataRes);
         val response = new BaseResponse();
-        response.setCode(HttpStatus.OK);
-        response.setMessage("sửa comment thành công");
+        response.setCode("1000");
+        response.setMessage("OK");
         response.setData(data);
         return response;
+    }
+
+    //api get post
+    @PostMapping("/get_post")
+    public BaseResponse get_post(@Valid @RequestParam(required = false) String token,
+                                    @Valid @RequestParam(required = false) Integer id
+
+    ) throws IOException {
+        val account = checkJwt(token);
+        if(id == null){
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
+        }
+        val post = postDao.findPostById(id);
+        if (post == null) {
+            throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
+        }
+        PostResponseId postResponseById = new PostResponseId();
+        postResponseById.setId(String.valueOf(post.getId()));
+        postResponseById.setDescribed(post.getContent());
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS MM/dd/yyyy");
+        postResponseById.setCreated(dateFormat.format(post.getCreatedOn()));
+        postResponseById.setModified(dateFormat.format(post.getModifiedOn()));
+        val countLike = likeDao.countLikeByPostId(post.getId());
+        postResponseById.setLike(String.valueOf(countLike));
+        val countComment = likeDao.countCommentByPostId(post.getId());
+        postResponseById.setComment(String.valueOf(countComment));
+        if(post.getAccountId() != 0){
+            val accountPost = accountDao.findAccountById(post.getAccountId());
+            if(accountPost != null){
+                PostResponseId.AuthorReponse authorReponse = new PostResponseId.AuthorReponse();
+                authorReponse.setAvatar(accountPost.getAvatar());
+                authorReponse.setId(String.valueOf(accountPost.getId()));
+                authorReponse.setPhone(accountPost.getPhoneNumber());
+                authorReponse.setOnline("0");
+                List<PostResponseId.AuthorReponse> authorReponses = new ArrayList<>();
+                authorReponses.add(authorReponse);
+                postResponseById.setAuthor(authorReponses);
+            }
+            val files = fileDao.findPostByAll(post.getId());
+            if(files != null){
+                List<PostResponseId.ImageResponse> imageResponses = new ArrayList<>();
+                for (val image: files) {
+                    PostResponseId.ImageResponse imageResponse = new PostResponseId.ImageResponse();
+                    imageResponse.setId(String.valueOf(image.getId()));
+                    imageResponse.setUrl(image.getUrl());
+                    imageResponses.add(imageResponse);
+                }
+                postResponseById.setImage(imageResponses);
+            }
+        }
+        postResponseById.setState(String.valueOf(post.isState()));
+        postResponseById.setCan_comment(String.valueOf(post.isCan_comment()));
+        postResponseById.setBanned(String.valueOf(post.isBanned()));
+        postResponseById.setCan_edit(String.valueOf(post.isCan_edit()));
+        postResponseById.setIs_liked(String.valueOf(checkLikePostById(account, post)));
+        postResponseById.setUrl(account.getName() + "/post/" + post.getId());
+        val response = new BaseResponse();
+        List<Object> data = new ArrayList<>();
+        data.add(postResponseById);
+        response.setData(data);
+        response.setCode("1000");
+        response.setMessage("OK");
+        return response;
+    }
+
+    private boolean checkLikePostById(Account account, Post post){
+        if(account.getId() != null && post.getId() != null){
+            val like = likeDao.findLikeByPostIdAndAccountId(post.getId(), account.getId());
+            if(like != null && like.getId() > 0){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

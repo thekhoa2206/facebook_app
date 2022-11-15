@@ -7,6 +7,7 @@ import com.web.config.sercurity.jwt.JwtProvider;
 import com.web.dao.jpa.AccountDao;
 import com.web.dto.BaseResponse;
 import com.web.dto.account.AccountResponse;
+import com.web.dto.exception.Exception;
 import com.web.dto.exception.FormValidateException;
 import com.web.model.Account;
 import com.web.repositories.AccountRepo;
@@ -40,15 +41,15 @@ public class SignupController extends BaseController{
 
     @PostMapping("/signup")
     public BaseResponse signup (@RequestParam(required = false) String phoneNumber, @RequestParam(required = false) String password,
-                                @Valid @RequestParam(required = false) String uuid) {
+                                @Valid @RequestParam(required = false) String uuid) throws Exception {
         Account account = null;
         if (phoneNumber == null) {
-            throw new FormValidateException("phoneNumber", "Số điện thoại không được để trống!");
+            throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         } else {
             CheckCommon.validatePhone(phoneNumber);
             account = accountDao.findAccountByPhone(phoneNumber);
             if(account != null)
-                throw new FormValidateException("phoneNumber", "Số điện thoại đã được sử dụng!");
+                throw new Exception("9996","User existed", "Người dùng đã tồn tại");
         }
         CheckCommon.checkPassword(password);
         Account accountReq = new Account();
@@ -58,11 +59,11 @@ public class SignupController extends BaseController{
         accountReq.setUuid(uuid);
         val accountx = accountRepo.save(accountReq);
         val response = new BaseResponse();
-        response.setCode(HttpStatus.OK);
+        response.setCode("1000");
         val accountResponse = mapper.map(accountx, AccountResponse.class);
         List<Object> data = new ArrayList<>();
         data.add(accountResponse);
-        response.setMessage("Đăng kí thành công!");
+        response.setMessage("OK");
         return response;
     }
 

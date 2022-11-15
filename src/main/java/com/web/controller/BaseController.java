@@ -4,14 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.CaseFormat;
 import com.web.config.sercurity.jwt.JwtProvider;
 import com.web.dao.jpa.AccountDao;
-import com.web.dto.exception.FormValidateException;
 import com.web.dto.exception.NotFoundException;
-import com.web.dto.exception.UnauthorizedException;
 import com.web.dto.exception.ValidateMessage;
 import com.web.model.Account;
 import lombok.extern.apachecommons.CommonsLog;
 import lombok.val;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -20,14 +17,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerErrorException;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.Map;
 
 @CommonsLog
@@ -44,44 +40,15 @@ public class BaseController {
         this.accountDao = accountDao;
     }
 
-    @ExceptionHandler(FormValidateException.class)
+
+    @ExceptionHandler(com.web.dto.exception.Exception.class)
     @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
-    public ValidateMessage handleFormValidateException(FormValidateException ex, HttpServletRequest request) {
+    public ValidateMessage handleFormValidateException(com.web.dto.exception.Exception ex, HttpServletRequest request) {
 
         val exceptionMessage = new ValidateMessage();
-        Map<String, Object> errors = new HashMap<String, Object>();
-        exceptionMessage.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
-        if (ex.getBindingResult() != null) {
-            for (val error : ex.getBindingResult().getFieldErrors()) {
-                putFieldError(errors, error);
-            }
-        }
-        if (ex.getMessageResult() != null) {
-            for (val error : ex.getMessageResult().entrySet()) {
-                val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.getKey());
-                if (!errors.containsKey(key)) {
-                    try {
-                        val keyLanguage = String.format("%s.%s", ex.getStackTrace()[0].getClassName(), key);
-                        errors.put(key, messageSource.getMessage(keyLanguage, null, LocaleContextHolder.getLocale()));
-                    } catch (NoSuchMessageException ns) {
-                        val value = error.getValue();
-                        errors.put(key, value);
-                    }
-                }
-            }
-        }
-        if (ex.getParams() != null) {
-            for (val param : ex.getParams().entrySet()) {
-                val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, param.getKey());
-                val keyLanguage = String.format("%s.%s", ex.getStackTrace()[0].getClassName(), key);
-                if (!errors.containsKey(key)) {
-                    errors.put(key, messageSource.getMessage(keyLanguage, param.getValue(), LocaleContextHolder.getLocale()));
-                }
-            }
-        }
-        exceptionMessage.setErrorCodes(ex.getErrorCodes());
-
-        exceptionMessage.setErrors(errors);
+        exceptionMessage.setMessage(ex.getMessage());
+        exceptionMessage.setCode(ex.getCode());
+        exceptionMessage.setNote(ex.getNote());
         return exceptionMessage;
     }
     @ExceptionHandler(NotFoundException.class)
@@ -121,91 +88,33 @@ public class BaseController {
         }
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public ValidateMessage handleUnauthorizedException(HttpServletResponse response, UnauthorizedException ex) {
-        response.setContentType("application/json");
-        val exceptionMessage = new ValidateMessage();
-        Map<String, Object> errors = new HashMap<String, Object>();
-        exceptionMessage.setStatus(HttpStatus.UNAUTHORIZED.value());
-        if (ex.getBindingResult() != null) {
-            for (val error : ex.getBindingResult().getFieldErrors()) {
-                putFieldError(errors, error);
-            }
-        }
-        if (ex.getMessageResult() != null) {
-            for (val error : ex.getMessageResult().entrySet()) {
-                val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.getKey());
-                if (!errors.containsKey(key)) {
-                    try {
-                        val keyLanguage = String.format("%s.%s", ex.getStackTrace()[0].getClassName(), key);
-                        errors.put(key, messageSource.getMessage(keyLanguage, null, LocaleContextHolder.getLocale()));
-                    } catch (NoSuchMessageException ns) {
-                        val value = error.getValue();
-                        errors.put(key, value);
-                    }
-                }
-            }
-        }
-        if (ex.getParams() != null) {
-            for (val param : ex.getParams().entrySet()) {
-                val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, param.getKey());
-                val keyLanguage = String.format("%s.%s", ex.getStackTrace()[0].getClassName(), key);
-                if (!errors.containsKey(key)) {
-                    errors.put(key, messageSource.getMessage(keyLanguage, param.getValue(), LocaleContextHolder.getLocale()));
-                }
-            }
-        }
-        exceptionMessage.setErrorCodes(ex.getErrorCodes());
-        exceptionMessage.setErrors(errors);
-        return exceptionMessage;
-        // return "{\"error\": \"[API] Invalid API key or access token
-        // (unrecognized login or wrong password)\"}";
-    }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public String handleError(HttpServletRequest req, HttpServletResponse response, Principal currentUser,
-                              Exception exception) {
-        response.setContentType("application/json; charset=utf-8");
-        String message = StringUtils.EMPTY;
-        StringWriter errors = new StringWriter();
-//		}
-        exception.printStackTrace(new PrintWriter(errors));
-        String host = req.getHeader("X-Forwarded-Host");
-        message = "Có lỗi xảy ra";
-        log.error(String.format("%s%s?%s", host, req.getRequestURI(), req.getQueryString())+" exception: " + exception.getMessage(), exception);
-        return "{\"error\": \"" + message + "\"}";
-    }
-
-    private void putFieldError(Map<String, Object> errors, FieldError error) {
-        try {
-            val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.getDefaultMessage());
-            val keyLanguage = String.format("%s.%s", error.getObjectName(), key);
-            errors.put(key, messageSource.getMessage(keyLanguage, null, LocaleContextHolder.getLocale()));
-        } catch (NoSuchMessageException | NullPointerException ex) {
-            val key = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, error.getField());
-            val value = error.getDefaultMessage();
-            if (!errors.containsKey(key)) {
-                errors.put(key, value);
-            }
-        }
+    public ValidateMessage handleError(HttpServletRequest req, HttpServletResponse response, Principal currentUser,
+                                                       Exception exception) {
+        ValidateMessage exception1 = new ValidateMessage();
+        exception1.setNote("Lỗi exception");
+        exception1.setCode("9999");
+        exception1.setMessage("Exception error");
+        return exception1;
     }
 
     public Account checkJwt(String token) {
         Account account = null;
         if(token == null || token.isEmpty()){
-            throw new UnauthorizedException("authentication.token", "Token không được để trống!");
+            throw new com.web.dto.exception.Exception("1013", "Token not empty", "Token không được để trống!");
         }
         if (token != null && tokenProvider.validateJwtToken(token)) {
             String phone = tokenProvider.getUserNameFromJwtToken(token);
             if(phone != null){
                 account = accountDao.findAccountByPhone(phone);
                 if(account == null){
-                    throw new UnauthorizedException("authentication.account", "Không tìm thấy tài khoản!");
+                    throw new com.web.dto.exception.Exception("9994","No Data or end of list data", "Không có dữ liệu hoặc không còn dữ liệu account");
                 }else{
                     if(!account.getToken().equals(token)){
-                        throw new UnauthorizedException("authentication.account", "Sai phiên đăng nhập! Cần đăng nhập lại");
+                        throw new com.web.dto.exception.Exception("9998","Token is invalid", "Sai token");
                     }
                 }
             }

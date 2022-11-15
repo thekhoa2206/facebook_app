@@ -1,6 +1,7 @@
 package com.web.config.sercurity.jwt;
 
 import com.web.dto.account.UserPrinciple;
+import com.web.dto.exception.Exception;
 import com.web.dto.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
@@ -34,18 +35,16 @@ public class JwtProvider {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException e) {
-            throw new UnauthorizedException("authentication", "Mã Token không hợp lệ");
+            throw new Exception("1021","Invalid Token Code", "Mã Token không hợp lệ");
         } catch (MalformedJwtException e) {
-            throw new UnauthorizedException("authentication", "Mã Token không hợp lệ");
+            throw new Exception("1021","Invalid Token Code", "Mã Token không hợp lệ");
         } catch (ExpiredJwtException e) {
-            throw new UnauthorizedException("authentication", "Phiên đăng nhập hết hạn");
+            throw new Exception("1021","Expired Tokens", "Phiên đăng nhập hết hạn");
         } catch (UnsupportedJwtException e) {
-            throw new UnauthorizedException("authentication", "Token không được hỗ trợ");
+            throw new Exception("1021","Invalid Token Code", "Token không được hỗ trợ");
         } catch (IllegalArgumentException e) {
-            logger.error("JWT claims string is empty -> Message: {}", e.getMessage());
+            throw new Exception("9999","Exception error", "Lỗi exception");
         }
-
-        return false;
     }
 
     public String getUserNameFromJwtToken(String token) {
