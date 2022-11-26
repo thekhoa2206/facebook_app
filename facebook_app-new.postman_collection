@@ -20,7 +20,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/login?phoneNumber=0971339759&password=admin",
+					"raw": "http://localhost:8080/api/login?phoneNumber=0971339759&password=admin&uuid=9fdce537-eaa8-460a-9181-1f9feb06ba3e",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -38,6 +38,10 @@
 						{
 							"key": "password",
 							"value": "admin"
+						},
+						{
+							"key": "uuid",
+							"value": "9fdce537-eaa8-460a-9181-1f9feb06ba3e"
 						}
 					]
 				}
@@ -83,7 +87,7 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/signup?phoneNumber=0971339753&password=122345678",
+					"raw": "http://localhost:8080/api/signup?phoneNumber=0971339754&password=122345678&uuid=9fdce537-eaa8-460a-9181-1f9feb06ba3e",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -96,11 +100,15 @@
 					"query": [
 						{
 							"key": "phoneNumber",
-							"value": "0971339753"
+							"value": "0971339754"
 						},
 						{
 							"key": "password",
 							"value": "122345678"
+						},
+						{
+							"key": "uuid",
+							"value": "9fdce537-eaa8-460a-9181-1f9feb06ba3e"
 						}
 					]
 				}
@@ -182,7 +190,7 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/get_list_post?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwOTcxMzM5NzU5IiwianRpIjoiNjczYTFjODEtMzRjZC00OWMwLWFmNGYtMjkxYmY4Yjg5YTI0IiwiaWF0IjoxNjY2MTAzMjc1LCJleHAiOjE2NjYxODk2NzV9.btpOS2SXXm2CHE423iF01NpR0VXP8no6TP8cznFXMQlexhoRkaYZL_LbfyeKJaPM80tlzo1X1LqwJjAVJyOcCw&user_id=1&last_id=0&index=0&count=2",
+					"raw": "http://localhost:8080/api/get_list_post?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwOTcxMzM5NzU5IiwiaWF0IjoxNjY5NDU1Nzg5LCJleHAiOjE2Njk1NDIxODl9.HtiJjG3nqhizWjlMCUGxYSJJdgRKo1Jl7nSRcKyE3Ujog93Y0Au_3uaZx1ApRoWhBgbn5k5kkMd3U6417gQH4A&user_id=1&last_id=0&index=0&count=2",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -195,7 +203,7 @@
 					"query": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwOTcxMzM5NzU5IiwianRpIjoiNjczYTFjODEtMzRjZC00OWMwLWFmNGYtMjkxYmY4Yjg5YTI0IiwiaWF0IjoxNjY2MTAzMjc1LCJleHAiOjE2NjYxODk2NzV9.btpOS2SXXm2CHE423iF01NpR0VXP8no6TP8cznFXMQlexhoRkaYZL_LbfyeKJaPM80tlzo1X1LqwJjAVJyOcCw"
+							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwOTcxMzM5NzU5IiwiaWF0IjoxNjY5NDU1Nzg5LCJleHAiOjE2Njk1NDIxODl9.HtiJjG3nqhizWjlMCUGxYSJJdgRKo1Jl7nSRcKyE3Ujog93Y0Au_3uaZx1ApRoWhBgbn5k5kkMd3U6417gQH4A"
 						},
 						{
 							"key": "user_id",
@@ -258,7 +266,7 @@
 					"formdata": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwOTcxMzM5NzU5IiwiaWF0IjoxNjY3Mzk3MzQxLCJleHAiOjE2Njc0ODM3NDF9.zCDR_vbbp8lGH2joyTVytZnVZHzB_pJJkKl9GOPjLASO94hnkCBnVvBw0zyPvxTZnanSdieBw6Kp5MJjqO1g8A",
+							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwOTcxMzM5NzU5IiwiaWF0IjoxNjY5NDU1Nzg5LCJleHAiOjE2Njk1NDIxODl9.HtiJjG3nqhizWjlMCUGxYSJJdgRKo1Jl7nSRcKyE3Ujog93Y0Au_3uaZx1ApRoWhBgbn5k5kkMd3U6417gQH4A",
 							"description": "o",
 							"type": "text"
 						},
@@ -276,7 +284,7 @@
 						},
 						{
 							"key": "described",
-							"value": "Bài đăng thứ 231",
+							"value": "Bài đăng thứ 23112312321",
 							"description": "x",
 							"type": "text"
 						},
@@ -528,6 +536,36 @@
 						{
 							"key": "comment",
 							"value": "Đây là comment sửa lại "
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get_post",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/get_post?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwOTcxMzM5NzU5IiwiaWF0IjoxNjY5NDU1Nzg5LCJleHAiOjE2Njk1NDIxODl9.HtiJjG3nqhizWjlMCUGxYSJJdgRKo1Jl7nSRcKyE3Ujog93Y0Au_3uaZx1ApRoWhBgbn5k5kkMd3U6417gQH4A&id=3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"get_post"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwOTcxMzM5NzU5IiwiaWF0IjoxNjY5NDU1Nzg5LCJleHAiOjE2Njk1NDIxODl9.HtiJjG3nqhizWjlMCUGxYSJJdgRKo1Jl7nSRcKyE3Ujog93Y0Au_3uaZx1ApRoWhBgbn5k5kkMd3U6417gQH4A"
+						},
+						{
+							"key": "id",
+							"value": "3"
 						}
 					]
 				}

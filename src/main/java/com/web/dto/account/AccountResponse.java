@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AccountResponse {
-    private int id;
+    private String id;
     private String name;
     private String token;
     private String avatar;

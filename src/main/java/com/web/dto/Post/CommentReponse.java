@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class CommentReponse {
-    private int id;
+    private String id;
     private String comment;
     private String created;
     private List<PosterReponse> posters;
@@ -17,7 +17,7 @@ public class CommentReponse {
     @Setter
     @JsonRootName(value = "poster")
     public static class  PosterReponse{
-        private int id;
+        private String id;
         private String phone;
         private String avatar;
     }

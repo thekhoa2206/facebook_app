@@ -13,20 +13,20 @@ import java.util.List;
 @Setter
 @JsonRootName(value = "post")
 public class PostResponse {
-    private int id;
+    private String id;
     private String name;
     private List<String> image;
     private List<VideoResponse> video;
     private String described;
     private Date created;
-    private int like;
-    private int comment;
-    private int is_liked;
-    private int is_blocked;
-    private int can_comment;
-    private int can_edit;
-    private int banned;
-    private int state;
+    private String like;
+    private String comment;
+    private String is_liked;
+    private String is_blocked;
+    private String can_comment;
+    private String can_edit;
+    private String banned;
+    private String state;
     private AuthorReponse author;
 
     @Getter
@@ -41,10 +41,10 @@ public class PostResponse {
     @Setter
     @JsonRootName(value = "author")
     public static class  AuthorReponse{
-        private int id;
+        private String id;
         private String phone;
         private String avatar;
-        private boolean online;
+        private String online;
     }
 
 }

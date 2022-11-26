@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 public class DataPostResponse {
     private ListPostResponse data;
-    private int inCampaign;
-    private int campaignId;
+    private String inCampaign;
+    private String campaignId;
 
 }

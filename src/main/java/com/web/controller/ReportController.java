@@ -63,7 +63,7 @@ public class ReportController extends BaseController {
 
     //api report
     @PostMapping("/report")
-    public BaseResponse report(@Valid @RequestParam(required = false) String token, @Valid @RequestParam(required = false) Integer id,
+    public BaseResponse report(@Valid @RequestParam(required = false) String token, @Valid @RequestParam(required = false) String id,
                                @Valid @RequestParam(required = false) String subject, @Valid @RequestParam(required = false) String details) {
         val account = checkJwt(token);
         if (id == null) {
@@ -74,6 +74,15 @@ public class ReportController extends BaseController {
         }
         if (details == null) {
             throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
+        }
+        Integer idI = null;
+        try {
+            idI = Integer.parseInt(id);
+        }catch (Exception e){
+            throw new Exception("1003","Parameter type is invalid", "Kiểu tham số không đúng đắn");
+        }
+        if(idI < 0){
+            throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
         }
         TypeReport typeReport = null;
         if (subject != null) {
@@ -86,7 +95,7 @@ public class ReportController extends BaseController {
                 typeReport = typeReportRepo.save(typeReportReq);
             }
         }
-        val post = postDao.findPostById(id);
+        val post = postDao.findPostById(idI);
         if (post == null)
             throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
         if (post != null) {
@@ -107,13 +116,22 @@ public class ReportController extends BaseController {
 
     //api like
     @PostMapping("/like")
-    public BaseResponse like(@Valid @RequestParam(required = false) String token, @Valid @RequestParam(required = false) Integer id) {
+    public BaseResponse like(@Valid @RequestParam(required = false) String token, @Valid @RequestParam(required = false) String id) {
         val account = checkJwt(token);
         if (id == null) {
             throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         }
+        Integer idI = null;
+        try {
+            idI = Integer.parseInt(id);
+        }catch (Exception e){
+            throw new Exception("1003","Parameter type is invalid", "Kiểu tham số không đúng đắn");
+        }
+        if(idI < 0){
+            throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
+        }
         val response = new BaseResponse();
-        val post = postDao.findPostById(id);
+        val post = postDao.findPostById(idI);
         if (post == null)
             throw new Exception("9992","Post is not existed", "Bài viết không tồn tại");
         if (post != null) {
@@ -130,7 +148,7 @@ public class ReportController extends BaseController {
             }
             val likeRes = new LikeReponse();
             val countLike = likeDao.countLikeByPostId(post.getId());
-            likeRes.setLike(countLike);
+            likeRes.setLike(String.valueOf(countLike));
             val data = new ArrayList<>();
             data.add(likeRes);
             response.setData(data);
@@ -142,23 +160,62 @@ public class ReportController extends BaseController {
 
     // api get_list_post
     @PostMapping("/get_list_post")
-    public BaseResponse getListPost(@Valid @RequestParam(required = false) String token, @Valid @RequestParam(required = false) Integer user_id,
-                                    @Valid @RequestParam(required = false) Integer index, @Valid @RequestParam(required = false) Integer count,
-                                    @Valid @RequestParam(required = false) Integer last_id, @Valid @RequestParam(required = false) Integer in_campaign,
-                                    @Valid @RequestParam(required = false) Integer campaign_id) {
+    public BaseResponse getListPost(@Valid @RequestParam(required = false) String token, @Valid @RequestParam(required = false) String user_id,
+                                    @Valid @RequestParam(required = false) String index, @Valid @RequestParam(required = false) String count,
+                                    @Valid @RequestParam(required = false) String last_id, @Valid @RequestParam(required = false) String in_campaign,
+                                    @Valid @RequestParam(required = false) String campaign_id) {
         val account = checkJwt(token);
         if(count == null)
             throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         if(index == null)
             throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
+
+        Integer countI = null;
+        Integer indexI = null;
+        Integer user_idI = null;
+        Integer last_idI = null;
+        Integer in_campaignI = null;
+        Integer campaign_idI = null;
+        try {
+            countI = Integer.parseInt(count);
+            indexI = Integer.parseInt(index);
+            if(user_id != null) user_idI = Integer.parseInt(user_id);
+            if(last_id != null) last_idI = Integer.parseInt(last_id);
+            if(in_campaign != null){
+                in_campaignI = Integer.parseInt(in_campaign);
+            }
+            if(campaign_id != null)
+                campaign_idI = Integer.parseInt(campaign_id);
+        }catch (Exception e){
+            throw new Exception("1003","Parameter type is invalid", "Kiểu tham số không đúng đắn");
+        }
+        if(countI < 0){
+            throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
+        }
+        if(indexI < 0){
+            throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
+        }
+        if(user_id != null && user_idI < 0) throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
+        if(last_id != null && last_idI < 0) throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
+        if(in_campaign != null && in_campaignI < 0) throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
+        if(campaign_id != null && campaign_idI < 0) throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
+
         List<DataPostResponse> listData = new ArrayList<>();
         List<Object> data = new ArrayList<>();
         val dataRes = new DataPostResponse();
         val listPostResponse = new ListPostResponse();
-        val posts = postDao.findPostByAll(count, index, campaign_id, in_campaign, user_id);
+        val accountCheck = accountDao.findAccountById(user_idI);
+        List<Post> posts = null;
+        if(accountCheck == null){
+             posts = postDao.findPostByAll(countI, indexI, campaign_idI, in_campaignI, null);
+        }else{
+             posts = postDao.findPostByAll(countI, indexI, campaign_idI, in_campaignI, user_idI);
+        }
+
         List<Post> postsLastId = null;
-        if(last_id != null && posts != null){
-            postsLastId = posts.stream().filter(i -> i.getId() > last_id).collect(Collectors.toList());
+        if(last_idI != null && posts != null){
+            Integer finalLast_idI = last_idI;
+            postsLastId = posts.stream().filter(i -> i.getId() > finalLast_idI).collect(Collectors.toList());
         }
         List<PostResponse> postResponses = new ArrayList<>();
         int lastId = 0;
@@ -168,16 +225,17 @@ public class ReportController extends BaseController {
                 postReponse.setDescribed(post.getContent());
                 postReponse.setCreated(post.getCreatedOn());
                 val countLike = likeDao.countLikeByPostId(post.getId());
-                postReponse.setLike(countLike);
+                postReponse.setLike(String.valueOf(countLike));
                 val countComment = likeDao.countCommentByPostId(post.getId());
-                postReponse.setComment(countComment);
+                postReponse.setComment(String.valueOf(countComment));
                 if(post.getAccountId() != 0){
                     val accountPost = accountDao.findAccountById(post.getAccountId());
                     if(accountPost != null){
                         PostResponse.AuthorReponse authorReponse = new PostResponse.AuthorReponse();
                         authorReponse.setAvatar(accountPost.getAvatar());
-                        authorReponse.setId(accountPost.getId());
+                        authorReponse.setId(String.valueOf(accountPost.getId()));
                         authorReponse.setPhone(accountPost.getPhoneNumber());
+                        authorReponse.setOnline("1");
                         postReponse.setName(accountPost.getName());
                         postReponse.setAuthor(authorReponse);
                     }
@@ -192,14 +250,14 @@ public class ReportController extends BaseController {
         }
         listPostResponse.setPosts(postResponses);
         if(postResponses != null && postResponses.size() > 0){
-            lastId = postResponses.get(postResponses.size() - 1).getId();
+            lastId = Integer.parseInt(postResponses.get(postResponses.size() - 1).getId());
         }
-        listPostResponse.setLastId(lastId);
-        listPostResponse.setNewItems(postsLastId.size());
+        listPostResponse.setLastId(String.valueOf(lastId));
+        listPostResponse.setNewItems(String.valueOf(postsLastId.size()));
         dataRes.setData(listPostResponse);
         if(campaign_id != null && in_campaign != null){
-            dataRes.setCampaignId(campaign_id);
-            dataRes.setInCampaign(in_campaign);
+            dataRes.setCampaignId(String.valueOf(campaign_idI));
+            dataRes.setInCampaign(String.valueOf(in_campaignI));
         }
         data.add(dataRes);
         val response = new BaseResponse();
@@ -211,16 +269,29 @@ public class ReportController extends BaseController {
 
     // api check_new_item
     @PostMapping("/check_new_item")
-    public BaseResponse checkNewItem(@Valid @RequestParam(required = false) Integer last_id, @Valid @RequestParam(required = false) Integer category_id){
+    public BaseResponse checkNewItem(@Valid @RequestParam(required = false) String last_id, @Valid @RequestParam(required = false) String category_id){
         if(last_id == null)
             throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
+
+
+        Integer category_idI = null;
+        Integer last_idI = null;
+        try {
+            last_idI = Integer.parseInt(last_id);
+            if(category_id != null) category_idI  = Integer.parseInt(category_id);
+        }catch (Exception e){
+            throw new Exception("1003","Parameter type is invalid", "Kiểu tham số không đúng đắn");
+        }
+
+        if(last_idI < 0) throw new Exception("1004", "Parameter type is invalid", "Giá trị của tham số không hợp lệ");
         val response = new BaseResponse();
-        val posts  = postDao.findPostByAllByLastId(category_id);
+        val posts  = postDao.findPostByAllByLastId(category_idI);
         if(posts != null){
-            val postsResponse = posts.stream().filter(i -> i.getId() > last_id).collect(Collectors.toList());
+            Integer finalLast_idI = last_idI;
+            val postsResponse = posts.stream().filter(i -> i.getId() > finalLast_idI).collect(Collectors.toList());
             List<Object> data = new ArrayList<>();
             val newItems = new NewItems();
-            newItems.setNewItem(postsResponse.size());
+            newItems.setNewItem(String.valueOf(postsResponse.size()));
             data.add(newItems);
             response.setData(data);
         }

@@ -10,8 +10,8 @@ import java.util.List;
 @Setter
 public class ListPostResponse {
     private List<PostResponse> posts;
-    private int newItems;
+    private String newItems;
     // id bài viết cuối
-    private int lastId;
+    private String lastId;
 
 }

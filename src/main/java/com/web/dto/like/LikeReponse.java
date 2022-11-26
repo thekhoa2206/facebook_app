@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LikeReponse {
-    private int like;
+    private String like;
 }

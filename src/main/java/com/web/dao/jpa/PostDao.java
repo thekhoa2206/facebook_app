@@ -21,8 +21,9 @@ public class PostDao {
     public Post findPostById(int id){
         String sql = "SELECT * FROM post where id = :idPost";
         Query query = entityManager.createNativeQuery(sql, Post.class);
-        Post post =  (Post) query.setParameter("idPost", id).getSingleResult();
+        Post post = null;
         try{
+            post =  (Post) query.setParameter("idPost", id).getSingleResult();
         }catch (Exception e){
             LOGGER.error("PostDao => ", e.getMessage());
         }

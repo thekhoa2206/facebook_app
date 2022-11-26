@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NewItems {
-    private int newItem;
+    private String newItem;
 }

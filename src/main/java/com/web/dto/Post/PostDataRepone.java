@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PostDataRepone {
-    private int Id;
+    private String Id;
     private String Url;
 }
