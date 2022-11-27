@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Repository(value = "AccountDao")
 @Transactional(rollbackOn = Exception.class)
@@ -46,12 +47,12 @@ public class AccountDao {
     }
 
     //Hàm tìm acoount
-    public Account findAccountByUuid(String uuid){
+    public List<Account> findAccountByUuid(String uuid){
         String sql = "SELECT * FROM account where uuid = :uuid";
         Query query = entityManager.createNativeQuery(sql, Account.class);
-        Account account = null;
+        List<Account> account = null;
         try{
-            account = (Account) query.setParameter("uuid", uuid).getSingleResult();
+            account = query.setParameter("uuid", uuid).getResultList();
         }catch (Exception e){
             LOGGER.error("accountDao => ", e.getMessage());
         }
