@@ -124,7 +124,7 @@ public class PostController extends BaseController {
                     image.setUrl(file.getOriginalFilename());
                     image.setCreatedOn();
                     image.setPost_id(postdata.getId());
-                    fileRepo.save(image);
+                     fileRepo.save(image);
                 }
                 message = "OK";
 
@@ -608,14 +608,27 @@ public class PostController extends BaseController {
             if (files != null) {
                 List<PostResponseId.ImageResponse> imageResponses = new ArrayList<>();
                 for (val image : files) {
-                    PostResponseId.ImageResponse imageResponse = new PostResponseId.ImageResponse();
-                    imageResponse.setId(String.valueOf(image.getId()));
-                    imageResponse.setUrl(image.getUrl());
-                    imageResponses.add(imageResponse);
+                    if(image.getUrl().indexOf("png") > 0 || image.getUrl().indexOf("jpg") > 0){
+                        PostResponseId.ImageResponse imageResponse = new PostResponseId.ImageResponse();
+                        imageResponse.setId(String.valueOf(image.getId()));
+                        imageResponse.setUrl(image.getUrl());
+                        imageResponses.add(imageResponse);
+                    }
                 }
                 postResponseById.setImage(imageResponses);
+
+                List<PostResponseId.VideoResponse> videoResponses = new ArrayList<>();
+                for (val image : files) {
+                    if(image.getUrl().indexOf("mp4") > 0){
+                        PostResponseId.VideoResponse videoResponse = new PostResponseId.VideoResponse();
+                        videoResponse.setUrl(image.getUrl());
+                        videoResponses.add(videoResponse);
+                    }
+                }
+                postResponseById.setVideo(videoResponses);
             }
         }
+
         postResponseById.setState(String.valueOf(post.isState()));
         postResponseById.setCan_comment(String.valueOf(post.isCan_comment()));
         postResponseById.setBanned(String.valueOf(post.isBanned()));

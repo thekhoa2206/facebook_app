@@ -53,7 +53,7 @@ public class SignupController extends BaseController{
         }
         if(uuid != null){
             val accountCheck = accountDao.findAccountByUuid(uuid);
-            if(accountCheck != null) throw new Exception("1021","Uuid existed", "Uuid đã tồn tại");
+            if(accountCheck != null && accountCheck.size() != 0) throw new Exception("1021","Uuid existed", "Uuid đã tồn tại");
         }
         CheckCommon.checkPassword(password);
         Account accountReq = new Account();
