@@ -13,5 +13,5 @@ import java.util.Set;
 public class ValidateMessage {
     private String code;
     private String message;
-    private String note;
+    //private String note;
 }

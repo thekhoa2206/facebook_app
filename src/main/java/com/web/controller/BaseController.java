@@ -48,7 +48,7 @@ public class BaseController {
         val exceptionMessage = new ValidateMessage();
         exceptionMessage.setMessage(ex.getMessage());
         exceptionMessage.setCode(ex.getCode());
-        exceptionMessage.setNote(ex.getNote());
+        //exceptionMessage.setNote(ex.getNote());
         return exceptionMessage;
     }
     @ExceptionHandler(NotFoundException.class)
@@ -95,7 +95,6 @@ public class BaseController {
     public ValidateMessage handleError(HttpServletRequest req, HttpServletResponse response, Principal currentUser,
                                                        Exception exception) {
         ValidateMessage exception1 = new ValidateMessage();
-        exception1.setNote("Lỗi exception");
         exception1.setCode("9999");
         exception1.setMessage("Exception error");
         return exception1;
