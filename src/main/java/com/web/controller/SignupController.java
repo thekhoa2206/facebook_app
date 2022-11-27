@@ -43,13 +43,17 @@ public class SignupController extends BaseController{
     public BaseResponse signup (@RequestParam(required = false) String phoneNumber, @RequestParam(required = false) String password,
                                 @Valid @RequestParam(required = false) String uuid) throws Exception {
         Account account = null;
-        if (phoneNumber == null) {
+        if (phoneNumber == null && password == null && uuid == null) {
             throw new Exception("1002","Parameter is not enought", "Số lượng parameter không đầy đủ");
         } else {
             CheckCommon.validatePhone(phoneNumber);
             account = accountDao.findAccountByPhone(phoneNumber);
             if(account != null)
                 throw new Exception("9996","User existed", "Người dùng đã tồn tại");
+        }
+        if(uuid != null){
+            val accountCheck = accountDao.findAccountByUuid(uuid);
+            if(accountCheck != null) throw new Exception("9997","Uuid existed", "Uuid đã tồn tại");
         }
         CheckCommon.checkPassword(password);
         Account accountReq = new Account();
