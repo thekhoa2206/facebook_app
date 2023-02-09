@@ -14,7 +14,6 @@ let upload = (fileUp, type) => {
       cloudinary.uploader
         .upload(path, { resource_type: "video" })
         .then((result) => {
-          // console.log(result)
           resolve({url: result.url,
                   thumb: result.url.slice(0, result.url.lastIndexOf("."))+".png"});
         })

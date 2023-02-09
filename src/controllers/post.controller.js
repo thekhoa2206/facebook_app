@@ -1,23 +1,17 @@
 const dotenv = require("dotenv");
 dotenv.config();
-// const fs = require("fs");
-// const formidable = require("formidable");
-// const { getVideoDurationInSeconds } = require("get-video-duration");
-// const mongoose = require("mongoose");
 
 const Post = require("../models/post.model.js");
 const User = require("../models/user.model.js");
 const ReportPost = require("../models/report.post.model.js");
 const Comment = require("../models/comment.model");
 const Notification = require("../models/notification.model");
-// const cloud = require("../helpers/cloud.helper.js");
 const formidableHelper = require("../helpers/formidable.helper");
 const cloudHelper = require("../helpers/cloud.helper.js");
 
 const statusCode = require("./../constants/statusCode.constant.js");
 const statusMessage = require("./../constants/statusMessage.constant.js");
 const { Mongoose } = require("mongoose");
-// const { uploadImage } = require("../helpers/cloud.helper.js");
 const deletePostAll = async (req, res)=>{
   var userAll = await User.find({});
   await Promise.all(userAll.map(userData=>{
@@ -27,7 +21,6 @@ const deletePostAll = async (req, res)=>{
       }
     })
   }))
-  // userAll.save();
   await Post.deleteMany({_id:{$ne: null}});
   res.status(200).json({
     message: "drop ok"
@@ -38,7 +31,6 @@ const addPost = async (req, res) => {
   const { _id } = req.userDataPass;
   const images = req.files['images'];
   const video = req.files['video'];
-  // validate input
   try {
     var newPost;
     var result = await formidableHelper.parse(req);
@@ -49,7 +41,6 @@ const addPost = async (req, res) => {
         state: state,
         status: status,
         video: result2,
-        // thumbnail: {url: result2.url.slice(0, result2.length-3)+"png"},
         created: Date.now(),
         modified: Date.now(),
         like: 0,
@@ -105,7 +96,6 @@ const addPost = async (req, res) => {
       code: statusCode.OK,
       message: statusMessage.OK,
       data: newPost,
-      // user: userData
     });
     try {
       var newNotification = await new Notification({
@@ -187,9 +177,7 @@ const getPost = async (req, res) => {
               select: "username avatar"
             }
           });
-    // console.log(result);
     if (!result || result.is_blocked) {
-      // không tìm thấy bài viết hoặc vi phạm tiêu chuẩn cộng đồng
       throw Error("POST_IS_NOT_EXISTED");
     }
     var resultUser = await User.findOne({ _id: result.author._id });
@@ -237,7 +225,6 @@ const editPost = async (req, res) => {
     auto_accept,
   } = req.body;
   try {
-    // console.log(image_del, image_del.length, typeof image_del)
     if (
       !id ||
       (described && described.length > 500) ||
@@ -273,8 +260,6 @@ const editPost = async (req, res) => {
           return true;
         }
       });
-      // postData.image= data2;
-      // console.log(image_del, postData.image)
     }
     if (video) {
       cloudHelper
@@ -297,7 +282,6 @@ const editPost = async (req, res) => {
             return cloudHelper.upload(element);
           })
       ).then(async (result2) => {
-        // console.log(result2)
         postData.image =
             postData.image && postData.length == 0
                 ? result2
@@ -419,19 +403,14 @@ const like = async (req, res) => {
   const { _id } = req.userDataPass._id;
   if(id){
     try {
-      // tim post theo id
       var result = await Post.findOne({ _id: id });
-      // neu khong co thi bao loi
       if (!result) {
         throw Error("notfound");
       }
-      // kiem tra post có bị block không
       if (result.is_blocked) {
         throw Error("isblocked");
       }
-      // nếu user đã like
       if (result.like_list.includes(String(_id))) {
-        // xoá user id khỏi danh sách đã like của post
         var isLiked = false;
         await Post.findByIdAndUpdate(id, {
           $pull: {
@@ -439,7 +418,6 @@ const like = async (req, res) => {
           },
           $set: {
             like: result.like - 1,
-            // is_liked: isLiked
           },
         });
         res.status(200).json({
@@ -453,7 +431,6 @@ const like = async (req, res) => {
         
         
       } else {
-        // nếu user chưa like thì thêm user id vào danh sách post
         var isLiked = true;
         await Post.findByIdAndUpdate(id, {
           $push: {
@@ -483,7 +460,6 @@ const like = async (req, res) => {
             avatar: req.userDataPass.avatar,
             group: "1",
             created: Date.now(),
-            // read: "0",
           }).save();
           await User.findByIdAndUpdate(result.author,{
             $push:{
@@ -529,13 +505,11 @@ const getComment = async (req, res) => {
   var { id, count, index } = req.query;
   const { _id } = req.userDataPass;
   try {
-    // kiểm tra input có null không
     if (!id) {
       throw Error("params");
     }
     index = index ? index : 0;
     count = count ? count : 20;
-    // tìm post theo id
     var postData = await Post.findOne({ _id: id }).populate({
       path: "comment_list",
       populate: {
@@ -544,25 +518,19 @@ const getComment = async (req, res) => {
       },
     });
     if (!postData) {
-      // neu bai viet khong ton tai
       console.log("not found");
       throw Error("notfound");
     } else if (postData.is_blocked) {
-      // bai viet bi khoa
       throw Error("blocked");
     } else {
-      // neu khong co loi gi
-      // kiem tra author bai viet cos block user khong
       var authorData = await User.findOne({ _id: postData.author });
       if (authorData.blockedIds.includes(String(_id))) {
         throw Error("authorblock");
       }
-      // kiểm tra user có block author bai viet không
       var userData = await User.findOne({ _id: _id });
       if (userData.blockedIds.includes(String(postData.author))) {
         throw Error("userblock");
       }
-      // nếu all ok
       var result3 = await Promise.all(
         postData.comment_list.map(async (element) => {
           const authorDataComment = await User.findOne({
@@ -632,45 +600,31 @@ const getComment = async (req, res) => {
     }
   }
 
-  // res.status(200)
 };
 
 const setComment = async (req, res) => {
   var { id, comment, index, count } = req.query;
   const { _id } = req.userDataPass;
 
-  // check params
   try {
-    // if (!comment || !id ) {
-    //   throw Error("params");
-    // }
     index = index ? index : 0;
     count = count ? count : 20;
-    // tim bai viet
     var result = await Post.findOne({ _id: id });
-    // neu khong tim thay bai viet
     if (!result) {
       throw Error("notfound");
     }
-    // neu bai viet bi block
     if (result.is_blocked) {
       throw Error("action");
     }
-    // tim author
     var authorData = await User.findOne({ _id: result.author });
     if (authorData.blockedIds.includes(String(_id))) {
-      // neu author block user
       throw Error("blocked");
     }
-    // tim user co block author k
-    // tim user
     var userData = await User.findOne({ _id: _id });
     if (userData.blockedIds.includes(String(result.author))) {
-      // neu user block author
       throw Error("notaccess");
     }
     var newcomment = new Comment({
-      // _id: mongoose.Schema.Types.ObjectId,
       poster: _id,
       comment: comment,
       created: Date.now(),
@@ -682,7 +636,6 @@ const setComment = async (req, res) => {
     console.log(newcomment);
     var result2 = await Post.findOne({ _id: id }).populate({
       path: "comment_list",
-      // skip: index||1,
       options: { sort: { created: -1 } },
 
       populate: {
@@ -708,7 +661,6 @@ const setComment = async (req, res) => {
         avatar: userData.avatar,
         group: "1",
         created: Date.now(),
-        // read: "0",
       }).save();
       await User.findByIdAndUpdate(result.author,{
         $push:{
@@ -765,7 +717,6 @@ const getListPosts = async (req, res) => {
     count,
   } = req.query;
   const { _id } = req.userDataPass;
-  // check params
   if(!index || !count){
     return res.status(200).json({
       code: statusCode.PARAMETER_IS_NOT_ENOUGHT,
@@ -794,11 +745,6 @@ const getListPosts = async (req, res) => {
     });
   }
   try {
-    // if (index || !count) {
-    //   // throw Error("params");
-    //   index = 0;
-    //   count = 20;
-    // }
     console.log(index, count)
     if(index==null||index=="") index=0;
     if(count==null||count=="") count=20;
@@ -815,8 +761,6 @@ const getListPosts = async (req, res) => {
               path: "poster",
               select: "username avatar"
             },
-
-            // select: "username avatar",
           },
           populate: {
             path: "like_list",
@@ -859,7 +803,6 @@ const getListPosts = async (req, res) => {
     });
     var postRes = [];
     result.friends.map((e, index) => {
-      // console.log(e.postIds);
       var temp=e.postIds;
       console.log(temp)
 
@@ -881,7 +824,6 @@ const getListPosts = async (req, res) => {
     var newLastIndex;
     if (findLastIndex == -1) {
       new_items = postRes.length;
-      // newLastIndex
     } else {
       new_items = findLastIndex;
     }
@@ -924,10 +866,6 @@ const checkNewItem = async (req, res) => {
       select: "postIds",
       populate: {
         path: "postIds",
-        // populate: {
-        //   path: "author",
-        //   select: "avatar username",
-        // },
         options: {
           sort: {
             created: -1,
@@ -938,7 +876,6 @@ const checkNewItem = async (req, res) => {
     var postRes = [];
     result.friends.map((e, index) => {
       postRes = postRes.concat(e.postIds);
-      // console.log(postRes)
     });
     function checkAdult(post) {
       return post._id == last_id;
@@ -948,7 +885,6 @@ const checkNewItem = async (req, res) => {
     var newLastIndex;
     if (findLastIndex == -1) {
       new_items = postRes.length;
-      // newLastIndex
     } else {
       new_items = findLastIndex;
     }
@@ -956,8 +892,6 @@ const checkNewItem = async (req, res) => {
       code: statusCode.OK,
       message: statusMessage.OK,
       data: {
-        // posts: postRes.slice(index, index + count),
-        // last_id: postRes[0]._id,
         new_items: new_items,
       },
     });

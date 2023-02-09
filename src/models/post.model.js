@@ -20,16 +20,13 @@ const postSchema = new mongoose.Schema({
     ref: "user",
   }],
   image: [{
-    // id:  Schema.Types.ObjectId,
     url: String,
   }],
   video: {
-    // id:  Schema.Types.ObjectId,
     thumb: String,
     url: String,
   },
   thumb: [{
-    // id:  Schema.Types.ObjectId,
     url: String,
   }],
   // 
@@ -40,8 +37,6 @@ const postSchema = new mongoose.Schema({
   can_edit: String,
   banned: String,
   can_comment: String,
-  // url: String,
-  // messages: Array,
   keyword: String,
 });
 const post = mongoose.model("post", postSchema);

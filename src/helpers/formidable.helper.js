@@ -2,7 +2,6 @@ require("dotenv").config();
 const formidable = require("formidable");
 const { getVideoDurationInSeconds } = require("get-video-duration");
 const statusCode = require("../constants/statusCode.constant");
-// const fs = require("fs");
 const cloud = require("./cloud.helper");
 let parse = (req, postData) => {
   return new Promise(async (resolve, reject) => {
@@ -26,7 +25,6 @@ let parse = (req, postData) => {
       console.log("Co ca video lan image");
       return reject(statusCode.FILE_SIZE_IS_TOO_BIG);
     }
-    // console.log(imageList)
     function checkAdult(e) {
       return e.size>4*1024*1024;
     }
@@ -58,14 +56,11 @@ let parse = (req, postData) => {
 };
 
 let parseOld = (req, postData) => {
-  // console.log
   return new Promise((resolve, reject) => {
     const form = new formidable.IncomingForm();
     form.parse(req, (err, fields, files) => {
       console.log(files);
       console.log(fields);
-      // số lượng file phải < 5
-      // var file = {};
       var numberOfImages =
         postData && postData.image ? postData.image.length : 0;
       var numberOfVideos =
@@ -96,7 +91,6 @@ let parseOld = (req, postData) => {
               return reject(statusCode.FILE_SIZE_IS_TOO_BIG);
             }
             if (file.size > 10 * 1024 * 1024) {
-              // kiem tra file video co hon hon 10MB khong
               console.log("dung lượng file lơn hơn 10Mb");
               return reject(statusCode.FILE_SIZE_IS_TOO_BIG);
             }

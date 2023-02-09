@@ -12,7 +12,6 @@ let isAuth = async (req, res, next) => {
 
   if (tokenFromClient) {
     try {
-      // if(tokenFromClient)
       const decoded = await jwtHelper.verifyToken(
         tokenFromClient,
         accessTokenSecret
@@ -31,7 +30,6 @@ let isAuth = async (req, res, next) => {
           message: statusMessage.USER_IS_NOT_VALIDATED,
         })
       }
-      // console.log(decoded)
       req.jwtDecoded = decoded;
       req.userDataPass = result;
 
@@ -50,10 +48,6 @@ let isAuth = async (req, res, next) => {
     });
   }
 };
-//this is my commets
-// No operation will do in here
-// And here
-// very useless :))))
 module.exports = {
   isAuth: isAuth,
 };

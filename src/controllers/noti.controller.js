@@ -89,7 +89,6 @@ const getUserInfo = async (req, res) => {
     const { token, user_id } = req.query;
     const { _id } = req.userDataPass;
     try {
-        // nếu tự xem thông tin của mình
         if (user_id == _id || !user_id) {
             console.log("trùng với id của user");
             var userData = await User.findById(_id).populate({
@@ -104,7 +103,6 @@ const getUserInfo = async (req, res) => {
                 data: userData,
             });
         }
-        // nếu xem thông tin của người khác
         try{
             var otherUserData = await User.findById(user_id).select(
                 "username created description avatar cover_image link address city country friends blockedIds is_blocked birthday"
@@ -195,7 +193,6 @@ const getNotification = async (req, res) => {
         var userData = await User.findById(_id).populate({
             path: "notifications.id",
 
-            // select: "username avatar",
         });
         return res.status(200).json({
             code: statusCode.OK,
@@ -302,20 +299,12 @@ const notSuggest = async (req, res)=>{
 const searchUser = async (req, res) => {
     var { keyword, index, count } = req.query;
     const { _id } = req.userDataPass;
-    // check params
     try {
         index = index ? index : 0;
         count = count ? count : 20;
         if (!keyword) {
             throw Error("params");
         }
-        // var savedSearchList = req.userDataPass.
-
-        // mo ta
-        //
-        // Ưu tiên đứng đầu danh sách là các kết quả có chứa đủ các từ và đúng thứ tự
-        // var postData1 =await Post.find({ described: new RegExp(keyword, "i") });
-        // Tiếp theo là các kết quả đủ từ nhưng không đúng thứ tự
         var userData1 =await User.find({$or: [
                 { username: new RegExp(keyword, "i") },
                 { username: new RegExp(keyword.replace(" ", "|"), "i") }
@@ -325,21 +314,6 @@ const searchUser = async (req, res) => {
             message: statusMessage.OK,
             data: userData1
         })
-        // await User.findByIdAndUpdate(_id,{
-        //     $pull:{
-        //         savedSearch: {
-        //             keyword: keyword,
-        //         }
-        //     }
-        // })
-        // await User.findByIdAndUpdate(_id,{
-        //     $push:{
-        //         savedSearch: {
-        //             keyword: keyword,
-        //             created: Date.now(),
-        //         }
-        //     }
-        // })
     } catch (error) {
         if (error.message == "params") {
             return res.status(500).json({
@@ -424,8 +398,6 @@ const getConversation = async (req, res) => {
                         conversation: [],
                         is_blocked: false,
                     },
-                    /*   server:
-                        userData.username + " want to message to " + partnerData.username, */
                 });
             }
             return res.status(200).json({
@@ -480,7 +452,6 @@ const getListConversation = async (req, res) => {
                 element.conversation[element.conversation.length - 1];
             if (element.conversation && element.conversation[0].unread == "1")
                 numNewMessage += 1;
-            // return element;
         });
         return res.status(200).json({
             code: statusCode.OK,

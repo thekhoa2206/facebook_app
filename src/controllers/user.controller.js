@@ -35,9 +35,6 @@ const logout = async (req, res) => {
 const changeInfoAfterSignup = async (req, res) => {
   const { _id, phonenumber } = req.userDataPass;
   const { token, username } = req.body;
-  // username để trống, chứa các kí tự đặc biệt, trùng với số điện thoại, 
-  // nhỏ hơn 6 tí tự hoặc lớn hơn 50 kí tự
-  // là đường dẫn, số điện thoại, địa chỉ
   const avatar = req.files['avatar'];
   const timeCurrent = Date.now();
   try {
@@ -59,16 +56,15 @@ const changeInfoAfterSignup = async (req, res) => {
           })
         }
         const oldpath = avatar[0].path;
-        const typeFile = avatar[0].originalname.split(".")[1]; //tách lấy kiểu của file mà người dùng gửi lên
-        if (!(typeFile == "jpg" || typeFile == "jpeg" || typeFile == "png")) { //không đúng định dạng
+        const typeFile = avatar[0].originalname.split(".")[1]; 
+        if (!(typeFile == "jpg" || typeFile == "jpeg" || typeFile == "png")) { 
           console.log("File không đúng định dạng");
           return res.status(200).json({
             code: statusCode.FILE_SIZE_IS_TOO_BIG,
             message: statusMessage.FILE_SIZE_IS_TOO_BIG
           })
         }
-        const result = await cloudHelper.upload(avatar[0], 'avatar'); //lưu và đổi tên file
-        // update tên user và đường dẫn avatar, thời gian sửa đổi
+        const result = await cloudHelper.upload(avatar[0], 'avatar'); 
         const userData = await User.findByIdAndUpdate(_id, {
           $set: {
             username: username,
@@ -137,22 +133,18 @@ const setBlock = async (req, res) => {
 
   try {
     type=Number(type);
-    //kiểm tra tham số đầu vào
     if (user_id == _id || (type != 0 && type != 1)) {
       console.log("trùng user_id hoặc type không đúng");
       throw Error("params");
     }
-    // tìm user bị block
     var friendData = await User.findById(user_id);
     if (!friendData || friendData.is_blocked) {
       console.log("friend không tìm thấy hoặc đã bị server block");
       throw Error("action");
     }
-    // OK
     var userData = req.userDataPass;
     var isBlocked = userData.blockedIds.includes(user_id);
     if (type == 0 && isBlocked) {
-      //block và đã block r
       throw Error("blockedbefore");
     }
     if (type == 0 && !isBlocked) {
@@ -187,7 +179,6 @@ const setBlock = async (req, res) => {
       });
     }
     if (type == 1 && !isBlocked) {
-      // unblock và chưa block
       throw Error("unblockedbefore");
     }
     if (type == 1 && isBlocked) {
@@ -245,13 +236,8 @@ const change_password = async (req, res) => {
     if (password == new_password) throw Error("PARAMETER_VALUE_IS_INVALID");
 
     let count = 0;
-    // chưa check xâu con chung dài nhất 80%
-
     password = md5(password);
     if (password != user.password) throw Error("OLD_PASSWORD_VALUE_IS_INVALID");
-
-    //đã thoả mãn các điều kiện
-
     new_password = md5(new_password);
     user.password = new_password;
     await user.save();
@@ -285,8 +271,7 @@ const change_password = async (req, res) => {
   }
 };
 
-const getPushSettings = async (req, res) => {
-  // const { token } = req.query;
+const getPushSettings = async (req, res) => {;
   const { _id } = req.userDataPass;
   try {
     var userData = req.userDataPass;
@@ -446,7 +431,6 @@ const checkNewVersion = async (req, res)=>{
 const search = async (req, res) => {
   var { keyword, index, count, user_id } = req.query;
   const { _id } = req.userDataPass;
-  // check params
   if(!user_id){
     return res.status(200).json({
       code: statusCode.PARAMETER_IS_NOT_ENOUGHT,
@@ -459,13 +443,6 @@ const search = async (req, res) => {
     if (!keyword) {
       throw Error("params");
     }
-    // var savedSearchList = req.userDataPass.
-
-    // mo ta
-    //
-    // Ưu tiên đứng đầu danh sách là các kết quả có chứa đủ các từ và đúng thứ tự
-    // var postData1 =await Post.find({ described: new RegExp(keyword, "i") });
-    // Tiếp theo là các kết quả đủ từ nhưng không đúng thứ tự
     var postData1 =await Post.find({$or: [
         { keyword: new RegExp(keyword, "i") },
         { keyword: new RegExp(keyword.replace(" ", "|"), "i") }
@@ -580,7 +557,6 @@ const getSavedSearch = async (req, res) => {
 const delSavedSearch = async (req, res) => {
   var { token, search_id, all } = req.query;
   const { _id } = req.userDataPass;
-  // check params
   if(isNaN(all)){
     all = 0;
   }
