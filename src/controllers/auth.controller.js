@@ -91,13 +91,11 @@ const signup = async (req, res) => {
       }
     } catch (error) {
       if (error.message == "PARAMETER_VALUE_IS_INVALID") {
-        console.log(error)
         return res.status(200).json({
           code: statusCode.PARAMETER_VALUE_IS_INVALID,
           message: statusMessage.PARAMETER_VALUE_IS_INVALID,
         });
       } else {
-        console.log(error)
         return res.status(200).json({
           code: statusCode.UNKNOWN_ERROR,
           message: statusMessage.UNKNOWN_ERROR,
@@ -148,8 +146,6 @@ const login = async (req, res) => {
               },
             });
           } else {
-            
-            console.log("password không hợp lệ")
             return res.status(200).json({
               code: statusCode.USER_IS_NOT_VALIDATED,
               message: statusMessage.USER_IS_NOT_VALIDATED,
@@ -157,8 +153,6 @@ const login = async (req, res) => {
             });
           }
         } else {
-          
-          console.log("phonenumber chưa được đăng kí")
           res.status(200).json({
             code: statusCode.USER_IS_NOT_VALIDATED,
             message: statusMessage.USER_IS_NOT_VALIDATED,
@@ -167,7 +161,6 @@ const login = async (req, res) => {
         }
       }
     } catch (error) {
-      console.log(error)
       if (error.message == "PARAMETER_VALUE_IS_INVALID") {
         return res.status(200).json({
           code: statusCode.PARAMETER_VALUE_IS_INVALID,

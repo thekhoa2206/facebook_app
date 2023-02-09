@@ -69,7 +69,6 @@ const setUserInfo = async (req, res) => {
             }
         })
     } catch (error) {
-        console.log(error)
         if (error.message=="params") {
             return res.status(500).json({
                 code: statusCode.PARAMETER_VALUE_IS_INVALID,
@@ -90,7 +89,6 @@ const getUserInfo = async (req, res) => {
     const { _id } = req.userDataPass;
     try {
         if (user_id == _id || !user_id) {
-            console.log("trùng với id của user");
             var userData = await User.findById(_id).populate({
                 path: "friends",
                 select: "username avatar"
@@ -141,7 +139,6 @@ const getUserInfo = async (req, res) => {
 
         });
     } catch (error) {
-        console.log(error)
         if (error.message == "notfound") {
             return res.status(500).json({
                 code: statusCode.USER_IS_NOT_VALIDATED,
@@ -286,7 +283,6 @@ const notSuggest = async (req, res)=>{
             message: statusMessage.OK,
         })
     } catch (error) {
-        console.log(error);
         return res.status(500).json({
             code: statusCode.UNKNOWN_ERROR,
             message: statusMessage.UNKNOWN_ERROR,
@@ -358,7 +354,6 @@ const getConversation = async (req, res) => {
                 },
             });
         } else if (partner_id && partner_id.length > 1) {
-            console.log(_id, partner_id);
             var chatData1 = await Chat.findOne({
                 partner_id: {
                     $all: [_id, partner_id],
@@ -413,7 +408,6 @@ const getConversation = async (req, res) => {
             throw Error("nodata");
         }
     } catch (error) {
-        console.log(error);
         if (error.message == "nodata") {
             return res.status(500).json({
                 code: statusCode.NO_DATA_OR_END_OF_LIST_DATA,
@@ -445,7 +439,6 @@ const getListConversation = async (req, res) => {
                 select: "username avatar",
             },
         });
-        console.log(userData.conversations);
         var numNewMessage = 0;
         userData.conversations.forEach((element) => {
             element.conversation =
@@ -460,7 +453,6 @@ const getListConversation = async (req, res) => {
             numNewMessage: numNewMessage,
         });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({
             code: statusCode.UNKNOWN_ERROR,
             message: statusMessage.UNKNOWN_ERROR,

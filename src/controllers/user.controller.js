@@ -49,7 +49,6 @@ const changeInfoAfterSignup = async (req, res) => {
     else {
       if(avatar){
         if (avatar[0].size > 1024 * 1024 * 4) {
-          console.log("quá 4mb dung lượng tối đa cho phép");
           return res.status(200).json({
             code: statusCode.FILE_SIZE_IS_TOO_BIG,
             message: statusMessage.FILE_SIZE_IS_TOO_BIG
@@ -58,7 +57,6 @@ const changeInfoAfterSignup = async (req, res) => {
         const oldpath = avatar[0].path;
         const typeFile = avatar[0].originalname.split(".")[1]; 
         if (!(typeFile == "jpg" || typeFile == "jpeg" || typeFile == "png")) { 
-          console.log("File không đúng định dạng");
           return res.status(200).json({
             code: statusCode.FILE_SIZE_IS_TOO_BIG,
             message: statusMessage.FILE_SIZE_IS_TOO_BIG
@@ -134,12 +132,10 @@ const setBlock = async (req, res) => {
   try {
     type=Number(type);
     if (user_id == _id || (type != 0 && type != 1)) {
-      console.log("trùng user_id hoặc type không đúng");
       throw Error("params");
     }
     var friendData = await User.findById(user_id);
     if (!friendData || friendData.is_blocked) {
-      console.log("friend không tìm thấy hoặc đã bị server block");
       throw Error("action");
     }
     var userData = req.userDataPass;
@@ -247,7 +243,6 @@ const change_password = async (req, res) => {
       message: statusMessage.OK,
     });
   } catch (error) {
-    console.log(error.message);
     if (error.message == "PARAMETER_VALUE_IS_INVALID")
       return res.status(200).json({
         code: statusCode.PARAMETER_VALUE_IS_INVALID,

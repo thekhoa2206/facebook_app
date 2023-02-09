@@ -7,11 +7,9 @@ const bodyParser = require("body-parser");
 var cors = require("cors");
 var multer = require("multer");
 var upload = multer({ dest: "uploads/" });
-// const ThumbnailGenerator = require('video-thumbnail-generator').default;
 const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
 const ffmpeg = require("fluent-ffmpeg");
 ffmpeg.setFfmpegPath(ffmpegPath);
-// const cookieParser = require( 'cookie-parser'
 const mongoose = require("mongoose");
 mongoose.connect(
   process.env.MONGO_URL || "mongodb://localhost/ungdungdanentang",
@@ -38,12 +36,9 @@ const { OK } = require("./src/constants/statusCode.constant.js");
 const Chat = require("./src/models/chat.model.js");
 
 const port = process.env.PORT || 3000;
-// const firstParamsRoute = process.env.FIRST_PARAMS_ROUTE || "it4788";
-
-// const app = express();
 app.use(cors());
-app.use(bodyParser.json({ limit: "50mb" })); // for parsing application/json
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(bodyParser.json({ limit: "50mb" })); 
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true })); 
 app.use(express.json());
 var cpUpload = upload.fields([
   { name: "images", maxCount: 4 },
@@ -62,13 +57,8 @@ app.all("/", (req, res) => {
 });
 
 app.post("/fileupload", (req, res) => {
-  console.log(req.files);
-  // fs.rename(oldpath, newpath, function (err) {
-  //   if (err) throw err;
   res.write("File uploaded and moved!");
   return res.end();
-  // });
-  // });
 });
 
 app.use(authRoute);
@@ -83,9 +73,7 @@ app.use(authMiddleware.isAuth, elevenRoute);
 app.use(authMiddleware.isAuth, bonusRoute);
 
 app.all("/test", (req, res)=>{
-  console.log("truowc khi tra ve")
   res.status(200).json("tra ve cho user");
-  console.log("sau khi tra ve")
 })
 chats = [];
 rooms = [];

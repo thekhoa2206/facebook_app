@@ -18,7 +18,6 @@ let upload = (fileUp, type) => {
                   thumb: result.url.slice(0, result.url.lastIndexOf("."))+".png"});
         })
         .catch((error) => {
-          console.log(error);
           reject(error);
         });
     } else {
@@ -28,7 +27,6 @@ let upload = (fileUp, type) => {
           resolve({url: result.url});
         })
         .catch((error) => {
-          console.log(error);
           reject(error);
         });
     }

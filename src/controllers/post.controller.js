@@ -110,7 +110,6 @@ const addPost = async (req, res) => {
         postData: newPost._id
       }).save();
     } catch (error) {
-      console.log(err)
     }
     
     try {
@@ -122,12 +121,10 @@ const addPost = async (req, res) => {
         })
       }));
     } catch (error) {
-      console.log(error)
     }
 
 
   } catch (error) {
-    console.log("error")
     if (error == statusCode.FILE_SIZE_IS_TOO_BIG) {
       return res.status(200).json({
         code: statusCode.FILE_SIZE_IS_TOO_BIG,
@@ -308,7 +305,6 @@ const editPost = async (req, res) => {
     });
   }
   } catch (error) {
-    console.log(error);
     if (error.message == "params") {
       return res.status(200).json({
         code: statusCode.PARAMETER_VALUE_IS_INVALID,
@@ -337,7 +333,6 @@ const deletePost = async (req, res) => {
       author: _id,
     });
     if (!result) {
-      console.log("Khong tim thay bai viet");
       throw Error("Post is not existed");
     }
     return res.status(200).json({
@@ -470,11 +465,9 @@ const like = async (req, res) => {
             }
           })
         } catch (error) {
-          console.log(error)
         }
       }
     } catch (error) {
-      console.log(error.message);
       if (error.message == "isblocked") {
         return res.status(200).json({
           code: statusCode.ACTION_HAS_BEEN_DONE_PREVIOUSLY_BY_THIS_USER,
@@ -518,7 +511,6 @@ const getComment = async (req, res) => {
       },
     });
     if (!postData) {
-      console.log("not found");
       throw Error("notfound");
     } else if (postData.is_blocked) {
       throw Error("blocked");
@@ -554,7 +546,6 @@ const getComment = async (req, res) => {
       });
     }
   } catch (err) {
-    console.log(err);
     if (err.message == "params") {
 
       return res.status(200).json({
@@ -563,35 +554,30 @@ const getComment = async (req, res) => {
  
       });
     } else if (err.message == "notfound") {
-      console.log("notfound");
       return res.status(200).json({
         code: statusCode.POST_IS_NOT_EXISTED,
         message: statusMessage.POST_IS_NOT_EXISTED,
   
       });
     } else if (err.message == "blocked") {
-      console.log("post is blocked");
       return res.status(200).json({
         code: statusCode.ACTION_HAS_BEEN_DONE_PREVIOUSLY_BY_THIS_USER,
         message: statusMessage.ACTION_HAS_BEEN_DONE_PREVIOUSLY_BY_THIS_USER,
       
       });
     } else if (err.message == "authorblock") {
-      console.log("authorblock");
       return res.status(200).json({
         code: statusCode.NOT_ACCESS,
         message: statusMessage.NOT_ACCESS,
    
       });
     } else if (err.message == "userblock") {
-      console.log("userblock");
       return res.status(200).json({
         code: statusCode.NOT_ACCESS,
         message: statusMessage.NOT_ACCESS,
        
       });
     } else {
-      console.log("unknown error");
       return res.status(200).json({
         code: statusCode.UNKNOWN_ERROR,
         message: statusMessage.UNKNOWN_ERROR,
@@ -633,7 +619,6 @@ const setComment = async (req, res) => {
     result.comment++;
     await result.save();
     await newcomment.save();
-    console.log(newcomment);
     var result2 = await Post.findOne({ _id: id }).populate({
       path: "comment_list",
       options: { sort: { created: -1 } },
@@ -671,11 +656,9 @@ const setComment = async (req, res) => {
         }
       })
     } catch (error) {
-      console.log(error)
     }
 
   } catch (error) {
-    console.log(error);
     if (error.message == "params") {
       return res.status(200).json({
         code: statusCode.PARAMETER_VALUE_IS_INVALID,
@@ -745,7 +728,6 @@ const getListPosts = async (req, res) => {
     });
   }
   try {
-    console.log(index, count)
     if(index==null||index=="") index=0;
     if(count==null||count=="") count=20;
     if(user_id){
@@ -804,8 +786,6 @@ const getListPosts = async (req, res) => {
     var postRes = [];
     result.friends.map((e, index) => {
       var temp=e.postIds;
-      console.log(temp)
-
       temp.map(e2=>{
         if(e2.like_list){
           e2.is_liked=e2.like_list.includes(_id);
@@ -848,7 +828,6 @@ const getListPosts = async (req, res) => {
         message: statusMessage.NO_DATA_OR_END_OF_LIST_DATA,
       });
     } else {
-      console.log(error);
       return res.status(200).json({
         code: statusCode.UNKNOWN_ERROR,
         message: statusMessage.UNKNOWN_ERROR,

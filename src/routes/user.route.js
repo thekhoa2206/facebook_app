@@ -2,8 +2,7 @@ const express = require("express");
 const userController = require("../controllers/user.controller.js");
 const router = express.Router();
 
-router.get("/user", (req, res) => {// test private page
-  console.log(req.jwtDecoded)
+router.get("/user", (req, res) => {
   return res.status(200).json("this is /user page");
 });
 router.post("/logout", userController.logout);

@@ -16,21 +16,17 @@ const setAcceptFriend = async (req, res) => {
     const { _id } = req.userDataPass;
     try {
         if (!user_id || !ObjectId.isValid(user_id) || user_id == _id) {
-            console.log("lỗi user_id không hợp lệ");
             throw Error("params");
         }
         var friendData = await User.findById(user_id);
         if (friendData && friendData.friends && friendData.friends.includes(_id)) {
-            console.log("Đã kết bạn");
             throw Error("notexist");
         }
 
         if (!friendData || friendData.is_blocked) {
-            console.log("friend bị block");
             throw Error("notexist");
         }
         if (friendData && friendData.blockedIds.includes(_id)) {
-            console.log("friend da block user");
             throw Error("action");
         }
 
@@ -114,7 +110,6 @@ const setAcceptFriend = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error)
         if (error.message == "params") {
             return res.status(200).json({
                 code: statusCode.PARAMETER_VALUE_IS_INVALID,
@@ -180,7 +175,6 @@ const getListSuggestedFriends = async (req, res) => {
             },
         });
     } catch (error) {
-        console.log(error);
         if (error.message == "params") {
             return res.status(500).json({
                 code: statusCode.PARAMETER_VALUE_IS_INVALID,
@@ -200,7 +194,6 @@ const setRequestFriend = async (req, res) => {
     const { _id } = req.userDataPass;
     try {
         if (!user_id || _id == user_id || !ObjectId.isValid(user_id)) {
-            console.log("check ");
             throw Error("params");
         }
         var userData = req.userDataPass;
@@ -230,7 +223,6 @@ const setRequestFriend = async (req, res) => {
                 receiverData.is_blocked ||
                 userData.is_blocked
             ) {
-                console.log("không tìm thấy hoặc đã bị block");
                 throw Error("notfound");
             }
             await userData.save();
@@ -263,7 +255,6 @@ const setRequestFriend = async (req, res) => {
                 receiverData.is_blocked ||
                 userData.is_blocked
             ) {
-                console.log("không tìm thấy hoặc đã bị block");
                 throw Error("notfound");
             }
             await userData.save();
@@ -274,7 +265,6 @@ const setRequestFriend = async (req, res) => {
             });
         }
         if (userData && userData.friends.length > commonConstant.LIMIT_FRIENDS) {
-            console.log("Đã đạt số lượng bạn tối đa");
             throw Error("9994");
         }
         userData.sendRequestedFriends.push({
@@ -295,7 +285,6 @@ const setRequestFriend = async (req, res) => {
             receiverData.is_blocked ||
             userData.is_blocked
         ) {
-            console.log("không tìm thấy hoặc đã bị block");
             throw Error("notfound");
         }
         await userData.save();
@@ -305,7 +294,6 @@ const setRequestFriend = async (req, res) => {
             message: statusMessage.OK,
         });
     } catch (error) {
-        console.log(error);
         if (error.message == "params") {
             return res.status(500).json({
                 code: statusCode.PARAMETER_VALUE_IS_INVALID,
@@ -411,7 +399,6 @@ const getRequestedFriends = async (req, res) => {
                 });
             });
     } catch (error) {
-        console.log(error);
         return res.status(500).json({
             code: statusCode.UNKNOWN_ERROR,
             message: statusMessage.UNKNOWN_ERROR,
@@ -453,10 +440,8 @@ const getListVideos = async (req, res) => {
         var b = await Promise.all(postData.map(async (element, index)=>{
             var result = await User.findById(element.author._id);
             if (result.blockedIds.includes(_id)||userData.blockedIds.includes(element.author._id)) {
-                console.log(false)
                 return false;
             }
-            console.log(true)
             return element;
         }))
         return res.status(200).json({
@@ -465,7 +450,6 @@ const getListVideos = async (req, res) => {
             data: b.filter(x=>x!=false).slice(Number(index), Number(index)+Number(count)),
         });
     } catch (error) {
-        console.log(error)
         return res.status(500).json({
             code: statusCode.UNKNOWN_ERROR,
             message: statusMessage.UNKNOWN_ERROR,
@@ -563,7 +547,6 @@ const getUserFriends = async (req, res) => {
             },
         });
     } catch (error) {
-        console.log(error)
         return res.status(500).json({
             code: statusCode.UNKNOWN_ERROR,
             message: statusMessage.UNKNOWN_ERROR,

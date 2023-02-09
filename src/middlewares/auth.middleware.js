@@ -35,7 +35,6 @@ let isAuth = async (req, res, next) => {
 
       next();
     } catch (error) {
-      console.log(error.message)
       return res.status(401).json({
         code: statusCode.PARAMETER_VALUE_IS_INVALID,
         message: statusMessage.PARAMETER_VALUE_IS_INVALID,
