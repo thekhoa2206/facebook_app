@@ -164,7 +164,6 @@ const change_password = async (req, res) => {
 };
 
 const getPushSettings = async (req, res) => {
-  // const { token } = req.query;
   const { _id } = req.userDataPass;
   try {
     var userData = req.userDataPass;

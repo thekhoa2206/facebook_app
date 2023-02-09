@@ -114,20 +114,14 @@ const notSuggest = async (req, res)=>{
 const searchUser = async (req, res) => {
   var { keyword, index, count } = req.query;
   const { _id } = req.userDataPass;
-  // check params
+  
   try {
     index = index ? index : 0;
     count = count ? count : 20;
       if (!keyword) {
           throw Error("params");
       }
-      // var savedSearchList = req.userDataPass.
-      
-      // mo ta
-      // 
-      // Ưu tiên đứng đầu danh sách là các kết quả có chứa đủ các từ và đúng thứ tự
-      // var postData1 =await Post.find({ described: new RegExp(keyword, "i") });
-      // Tiếp theo là các kết quả đủ từ nhưng không đúng thứ tự
+     
       var userData1 =await User.find({$or: [
           { username: new RegExp(keyword, "i") },
           { username: new RegExp(keyword.replace(" ", "|"), "i") }
@@ -137,21 +131,7 @@ const searchUser = async (req, res) => {
           message: statusMessage.OK,
           data: userData1
       })
-      // await User.findByIdAndUpdate(_id,{
-      //     $pull:{
-      //         savedSearch: {
-      //             keyword: keyword,
-      //         }
-      //     }
-      // })
-      // await User.findByIdAndUpdate(_id,{
-      //     $push:{
-      //         savedSearch: {
-      //             keyword: keyword,
-      //             created: Date.now(),
-      //         }
-      //     }
-      // })
+     
   } catch (error) {
       if (error.message == "params") {
           return res.status(500).json({

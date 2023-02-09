@@ -103,8 +103,7 @@ const setAcceptFriend = async (req, res) => {
       });
 
       
-      // partnerData.conversations.push(chatData._id);
-      // await partnerData.save();
+
       if (_id != user_id) {
         await User.findByIdAndUpdate(_id, {
           $push: {
@@ -162,7 +161,7 @@ const getListSuggestedFriends = async (req, res) => {
     var otherUsersData = await User.find({});
     var result = await Promise.all(
       otherUsersData.map((element) => {
-        // console.log()
+    
         if (
           userData.friends.includes(element._id) ||
           _id.toString()==element._id.toString() ||

@@ -57,11 +57,7 @@ const getListPosts = async (req, res) => {
     });
   }
   try {
-    // if (index || !count) {
-    //   // throw Error("params");
-    //   index = 0;
-    //   count = 20;
-    // }
+    
     console.log(index, count)
     if(index==null||index=="") index=0;
     if(count==null||count=="") count=20;
@@ -79,7 +75,6 @@ const getListPosts = async (req, res) => {
               select: "username avatar"
             },
             
-            // select: "username avatar",
           },
           populate: {
             path: "like_list",
@@ -122,7 +117,6 @@ const getListPosts = async (req, res) => {
     });
     var postRes = [];
     result.friends.map((e, index) => {
-      // console.log(e.postIds);
       var temp=e.postIds;
       console.log(temp)
       
@@ -144,7 +138,6 @@ const getListPosts = async (req, res) => {
     var newLastIndex;
     if (findLastIndex == -1) {
       new_items = postRes.length;
-      // newLastIndex
     } else {
       new_items = findLastIndex;
     }
@@ -186,11 +179,7 @@ const checkNewItem = async (req, res) => {
       path: "friends",
       select: "postIds",
       populate: {
-        path: "postIds",
-        // populate: {
-        //   path: "author",
-        //   select: "avatar username",
-        // },
+        path: "postIds",   
         options: {
           sort: {
             created: -1,
@@ -201,7 +190,6 @@ const checkNewItem = async (req, res) => {
     var postRes = [];
     result.friends.map((e, index) => {
       postRes = postRes.concat(e.postIds);
-      // console.log(postRes)
     });
     function checkAdult(post) {
       return post._id == last_id;
@@ -211,7 +199,6 @@ const checkNewItem = async (req, res) => {
     var newLastIndex;
     if (findLastIndex == -1) {
       new_items = postRes.length;
-      // newLastIndex
     } else {
       new_items = findLastIndex;
     }
@@ -219,8 +206,6 @@ const checkNewItem = async (req, res) => {
       code: statusCode.OK,
       message: statusMessage.OK,
       data: {
-        // posts: postRes.slice(index, index + count),
-        // last_id: postRes[0]._id,
         new_items: new_items,
       },
     });

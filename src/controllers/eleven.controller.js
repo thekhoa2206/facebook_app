@@ -80,8 +80,7 @@ const getConversation = async (req, res) => {
             conversation: [],
             is_blocked: false,
           },
-        /*   server:
-            userData.username + " want to message to " + partnerData.username, */
+        
         });
       }
       return res.status(200).json({
@@ -136,7 +135,7 @@ const getListConversation = async (req, res) => {
         element.conversation[element.conversation.length - 1];
       if (element.conversation && element.conversation[0].unread == "1")
         numNewMessage += 1;
-      // return element;
+     
     });
     return res.status(200).json({
       code: statusCode.OK,
