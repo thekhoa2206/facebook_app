@@ -19,7 +19,6 @@ const setAcceptFriend = async (req, res) => {
             console.log("lỗi user_id không hợp lệ");
             throw Error("params");
         }
-        // tim friend muốn accept hoặc unaccept
         var friendData = await User.findById(user_id);
         if (friendData && friendData.friends && friendData.friends.includes(_id)) {
             console.log("Đã kết bạn");
@@ -57,9 +56,7 @@ const setAcceptFriend = async (req, res) => {
             });
         }
         if (is_accept == 1) {
-            // kiểm tra xem đã kết bạn chưa
 
-            // tìm user và xoá requested friend có author == user_id
             var userData = await User.findByIdAndUpdate(_id, {
                 $pull: {
                     requestedFriends: {
@@ -102,9 +99,6 @@ const setAcceptFriend = async (req, res) => {
                 },
             });
 
-
-            // partnerData.conversations.push(chatData._id);
-            // await partnerData.save();
             if (_id != user_id) {
                 await User.findByIdAndUpdate(_id, {
                     $push: {
@@ -162,7 +156,7 @@ const getListSuggestedFriends = async (req, res) => {
         var otherUsersData = await User.find({});
         var result = await Promise.all(
             otherUsersData.map((element) => {
-                // console.log()
+
                 if (
                     userData.friends.includes(element._id) ||
                     _id.toString()==element._id.toString() ||
@@ -209,9 +203,7 @@ const setRequestFriend = async (req, res) => {
             console.log("check ");
             throw Error("params");
         }
-        // tìm dữ liệu user
         var userData = req.userDataPass;
-        // kiểm tra receiver có gửi lời mời đến user không(có thì add bạn luôn)
         var receiverRequested = -1;
         userData.requestedFriends.map((element, index) => {
             if (element && element.author == user_id) {
@@ -249,7 +241,6 @@ const setRequestFriend = async (req, res) => {
             });
         }
 
-        // kiểm tra lời mời kết bạn đã tốn tại chưa(đã gửi đi chưa)
         var requestExisted = -1;
         userData.sendRequestedFriends.map((element, index) => {
             if (element && element.receiver == user_id) {
@@ -385,10 +376,8 @@ const getRequestedFriends = async (req, res) => {
         count = count ? count : 20;
         var userData = await User.findById(_id).populate({
             path: "requestedFriends.author",
-            // select: "author._id author.username author.avatar",
         });
-        //.limit(count).skip(index);
-        // console.log(userData);
+
         Promise.all(
             userData.requestedFriends.map((element) => {
                 return sameFriendsHelper.sameFriends(
@@ -398,11 +387,7 @@ const getRequestedFriends = async (req, res) => {
             })
         )
             .then((result) => {
-                // console.log(result);
-                // console.log(userData.requestedFriends)
                 var a = userData.requestedFriends.map((value, index) => {
-                    // let {_id, username, avatar} = value._doc.author;
-                    // console.log(value.author._id)
                     return {
                         _id: value.author._id || null,
                         avatar: value.author.avatar || null,
@@ -410,7 +395,6 @@ const getRequestedFriends = async (req, res) => {
                         same_friend: result[index],
                     };
                 });
-                // console.log(a)
                 return res.status(200).json({
                     code: statusCode.OK,
                     message: statusMessage.OK,
@@ -466,7 +450,6 @@ const getListVideos = async (req, res) => {
             }
         })
         var userData = req.userDataPass;
-        // user block athor
         var b = await Promise.all(postData.map(async (element, index)=>{
             var result = await User.findById(element.author._id);
             if (result.blockedIds.includes(_id)||userData.blockedIds.includes(element.author._id)) {
@@ -561,7 +544,6 @@ const getUserFriends = async (req, res) => {
                 );
             })
         );
-        // console.log(resultSameFriend)
         userData = await User.findById(_id).populate({
             path: "friends",
             select: "avatar username"
