@@ -57,7 +57,7 @@ const addPost = async (req, res) => {
         comment: 0,
         author: _id,
       }).save();
-     
+
     } else if (images) {
       var result2 = await Promise.all(
           images.map((element) => {
@@ -77,7 +77,7 @@ const addPost = async (req, res) => {
         author: _id,
         keyword: removeAscent(described),
       }).save();
-      
+
     } else {
       newPost = await new Post({
         described: described,
@@ -91,7 +91,7 @@ const addPost = async (req, res) => {
         author: _id,
         keyword: removeAscent(described),
       }).save();
-      
+
     }
     var userData= await User.findOneAndUpdate(
       { _id: _id },
