@@ -10,15 +10,12 @@ const statusCode = require("./../constants/statusCode.constant.js");
 const statusMessage = require("./../constants/statusMessage.constant.js");
 const commonConstant = require("../constants/common.constant.js");
 
-// const tokenList = {};
 
 const accessTokenLife = process.env.ACCESS_TOKEN_LIFE || commonConstant.ACCESS_TOKEN_LIFE;
 const accessTokenSecret =
   process.env.ACCESS_TOKEN_SECRET || "accessTokenSecret";
 
-// const refreshTokenLife = process.env.REFRESH_TOKEN_LIFE || "3650d";
-// const refreshTokenSecret =
-//   process.env.REFRESH_TOKEN_SECRET || "refreshTokenSecret";
+
 function validationPhonenumber(phonenumber) {
   if (
     !phonenumber ||
@@ -49,10 +46,7 @@ function validationPasword(password, phonenumber) {
 
 
 const signup = async (req, res) => {
-  // const { phonenumber, password, uuid } = req.body;
   const { phonenumber, password, uuid, username } = req.query;
-  // phonenumber không tồn tại, độ dài khác 10, không có số không đầu tiên,
-  // chứa kí tự không phải số
   if(phonenumber && password && uuid){
     try {
       if (validationPhonenumber(phonenumber) ||
@@ -63,7 +57,7 @@ const signup = async (req, res) => {
       } else {
         const userData = await User.findOne({ phonenumber: phonenumber });
         if (!userData) {
-          //chưa có phonenumber đã được đăng kí
+         
           const hashedPassword = md5(password);
 
           const user = new User({
@@ -88,7 +82,7 @@ const signup = async (req, res) => {
             }
           });
         } else {
-          // phonenumber đã được đăng kí từ trước
+          
           return res.status(200).json({
             code: statusCode.USER_EXISTED,
             message: statusMessage.USER_EXISTED,
@@ -118,33 +112,23 @@ const signup = async (req, res) => {
   }
 
 };
-//doing here
 const login = async (req, res) => {
-  const { phonenumber, password } = req.query;// gửi bằng query params
+  const { phonenumber, password } = req.query;
   if(phonenumber && password){
     try {
       if (validationPhonenumber(phonenumber) || validationPasword(password)) {
         throw Error("PARAMETER_VALUE_IS_INVALID");
-      } else {// nhập đúng định dạng phonenumber và password
-        // tìm dữ liệu user qua phonenumber
+      } else {
         const userData = await User.findOne({ phonenumber: phonenumber });
         if (userData) {
-          // tìm được user có trong hệ thống
-          const hashedPassword = md5(password);// mã hoá password
+          const hashedPassword = md5(password);
           if (hashedPassword == userData.password) {
-            // kiểm tra password
-            // tạo token
             const accessToken = await jwtHelper.generateToken(
                 {_id: userData._id, phonenumber: userData.phonenumber},
                 accessTokenSecret,
                 accessTokenLife
             );
-            // const refreshToken = await jwtHelper.generateToken(
-            //   userData,
-            //   refreshTokenSecret,
-            //   refreshTokenLife
-            // );
-            // lưu token tương ứng vs user, nếu đã tốn tại token thì thay thế token
+           
             await User.findOneAndUpdate(
                 { _id: userData._id },
                 {
@@ -159,12 +143,12 @@ const login = async (req, res) => {
                 id: userData._id,
                 username: userData.username,
                 token: accessToken,
-                // refreshToken: refreshToken, // chưa cần dùng
+                
                 avatar: userData.avatar,
               },
             });
           } else {
-            // password không hợp lệ
+            
             console.log("password không hợp lệ")
             return res.status(200).json({
               code: statusCode.USER_IS_NOT_VALIDATED,
@@ -173,7 +157,7 @@ const login = async (req, res) => {
             });
           }
         } else {
-          // phonenumber chưa được đăng kí
+          
           console.log("phonenumber chưa được đăng kí")
           res.status(200).json({
             code: statusCode.USER_IS_NOT_VALIDATED,
@@ -224,9 +208,7 @@ const getVerifyCode = async (req, res) => {
       message: statusMessage.PARAMETER_VALUE_IS_INVALID,
     });
   } else {
-    //neu duoi 120s khi da gui request nay thi bao loi 1010 1009
     
-    //Nguoi dung truyền tham số với số điện thoại chưa được đăng ký.
     const userData = await User.findOne({ phonenumber: phonenumber });
     if(userData){
       return res.status(200).json({
@@ -263,7 +245,7 @@ const checkVerifyCode = async (req, res) => {
       message: statusMessage.PARAMETER_VALUE_IS_INVALID,
     });
   } else {
-    //neu duoi 120s khi da gui request nay thi bao loi 1010 1009
+    
     const userData = await User.findOne({ phonenumber: phonenumber });
     if (userData) {
       const accessToken = await jwtHelper.generateToken(
@@ -271,7 +253,7 @@ const checkVerifyCode = async (req, res) => {
         accessTokenSecret,
         accessTokenLife
       );
-      // lưu token tương ứng vs user, nếu đã tốn tại token thì thay thế token
+      
       await User.findOneAndUpdate(
         { _id: userData._id },
         {
